@@ -1,0 +1,26 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.0.0",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^3.0.0",
+        "tailwindcss": "^4.0.0",
+        "typescript": "^6.0.3",
+        "vite": "^8.0.0",
+        "vue-tsc": "^3.2.7"
+    },
+    "dependencies": {
+        "@vitejs/plugin-vue": "^6.0.6",
+        "axios": "^1.15.2",
+        "element-plus": "^2.13.7",
+        "pinia": "^3.0.4",
+        "vue": "^3.5.33",
+        "vue-router": "^5.0.6"
+    }
+}

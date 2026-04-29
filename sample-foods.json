@@ -1,0 +1,54 @@
+[
+  {
+    "name": "鮭魚便當",
+    "brand": "自訂",
+    "category": "rice_box",
+    "serving_unit": "份",
+    "serving_size": 1,
+    "calories": 580,
+    "protein_g": 38,
+    "fat_g": 18,
+    "carbs_g": 65
+  },
+  {
+    "name": "牛肉麵",
+    "brand": "自訂",
+    "category": "noodle",
+    "serving_unit": "碗",
+    "serving_size": 1,
+    "calories": 750,
+    "protein_g": 35,
+    "fat_g": 25,
+    "carbs_g": 90
+  },
+  {
+    "name": "拿鐵咖啡",
+    "brand": "星巴克",
+    "category": "drink",
+    "serving_unit": "杯",
+    "serving_size": 1,
+    "calories": 180,
+    "protein_g": 9,
+    "fat_g": 9,
+    "carbs_g": 16
+  },
+  {
+    "name": "蘋果",
+    "brand": null,
+    "category": "snack",
+    "serving_unit": "顆",
+    "serving_size": 1,
+    "calories": 95
+  },
+  {
+    "name": "雞塊",
+    "brand": "麥當勞",
+    "category": "fast_food",
+    "serving_unit": "份",
+    "serving_size": 6,
+    "calories": 280,
+    "protein_g": 13,
+    "fat_g": 18,
+    "carbs_g": 16
+  }
+]

@@ -1,0 +1,10 @@
+name,brand,category,serving_unit,serving_size,calories,protein_g,fat_g,carbs_g
+雞胸便當,自訂,rice_box,份,1,520,42,12,60
+茶葉蛋,便利商店,convenience,個,1,70,6,5,1
+無糖豆漿,自訂,drink,瓶,1,160,14,6,10
+香蕉,自訂,snack,根,1,90,1.2,0.3,23
+全麥吐司,自訂,snack,片,1,80,3,1,15
+水煮蛋,自訂,convenience,個,1,75,6,5,1
+,空名稱測試,rice_box,份,1,300,10,5,40
+無分類測試,自訂,,份,1,200,5,3,30
+雞胸便當,自訂,rice_box,份,1,520,42,12,60
