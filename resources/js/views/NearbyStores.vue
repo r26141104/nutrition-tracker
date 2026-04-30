@@ -294,6 +294,12 @@ function retryLocation(): void {
       正在顯示：<strong>{{ locationLabel }}</strong> 周圍的店家
     </p>
 
+    <!-- 錯誤橫幅（推測菜單失敗等） -->
+    <div v-if="errorMsg && status === 'ok'" class="error-banner">
+      ⚠️ {{ errorMsg }}
+      <button class="error-close" @click="errorMsg = ''">✕</button>
+    </div>
+
     <!-- 載入中/錯誤狀態 -->
     <div v-if="status === 'init' || status === 'locating'" class="state-card">
       <span class="spinner"></span>
@@ -357,6 +363,18 @@ function retryLocation(): void {
               <span v-if="s.nearby_branch_count > 1" class="branch-note">
                 · 附近還有 {{ s.nearby_branch_count - 1 }} 家分店
               </span>
+            </div>
+            <!-- 營業時間 / 電話 / 網址（OSM 有資料才顯示） -->
+            <div v-if="s.opening_hours || s.phone || s.website" class="store-extra">
+              <span v-if="s.opening_hours" class="info-line" :title="s.opening_hours">
+                🕐 {{ s.opening_hours }}
+              </span>
+              <a v-if="s.phone" :href="`tel:${s.phone}`" class="info-line phone-link">
+                📞 {{ s.phone }}
+              </a>
+              <a v-if="s.website" :href="s.website" target="_blank" rel="noopener" class="info-line website-link">
+                🌐 官網
+              </a>
             </div>
           </div>
           <div class="store-action">
@@ -511,6 +529,25 @@ function retryLocation(): void {
 .store-meta { display: flex; gap: 6px; align-items: center; font-size: 0.8125rem; color: #64748b; margin-top: 2px; flex-wrap: wrap; }
 .branch-note { color: #94a3b8; font-size: 0.75rem; }
 
+.store-extra {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: #475569;
+}
+.info-line {
+  display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.phone-link, .website-link {
+  color: #0ea5e9;
+  text-decoration: none;
+}
+.phone-link:hover, .website-link:hover { text-decoration: underline; }
+
 .badge {
   font-size: 0.6875rem; padding: 2px 8px; border-radius: 999px;
   background: #ede9fe; color: #6d28d9; font-weight: 500;
@@ -533,6 +570,18 @@ function retryLocation(): void {
 }
 .btn-ai:hover:not(:disabled) { background: #ddd6fe; }
 .btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.error-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fef2f2; border: 1px solid #fecaca;
+  color: #b91c1c; padding: 12px 16px; border-radius: 8px;
+  margin: 12px 0; font-size: 0.875rem;
+}
+.error-close {
+  background: transparent; border: 0; color: #b91c1c;
+  cursor: pointer; padding: 0 8px; font-size: 1rem;
+}
+.error-close:hover { color: #7f1d1d; }
 
 .empty {
   padding: 32px; text-align: center; color: #94a3b8;

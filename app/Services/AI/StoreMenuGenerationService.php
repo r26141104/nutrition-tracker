@@ -65,16 +65,32 @@ class StoreMenuGenerationService
             throw new RuntimeException('尚未設定 Gemini API key。');
         }
 
-        $rawText = $this->callGeminiWithFallback($apiKey, $this->buildPrompt($storeName));
+        // 兩階段嘗試：
+        //   階段 1：用 google_search grounding（準確度高但可能超時）
+        //   階段 2：失敗就 fallback 到純 prompt 版（快但只能用店名猜）
+        // 確保使用者一定拿到結果
+        $parsed = null;
+        try {
+            $rawText = $this->callGeminiWithFallback($apiKey, $this->buildPrompt($storeName), useSearch: true);
+            $jsonText = $this->extractJson($rawText);
+            $parsed = json_decode($jsonText, true);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::info('AI menu generation: search version failed, falling back', [
+                'store' => $storeName,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
-        // 因為開了 google_search，AI 會回 markdown + JSON 混合，要從文字裡抽出 JSON
-        $jsonText = $this->extractJson($rawText);
-
-        $parsed = json_decode($jsonText, true);
-        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($parsed)) {
-            throw new RuntimeException(
-                'AI 回的不是合法 JSON：' . substr($jsonText !== '' ? $jsonText : $rawText, 0, 300),
-            );
+        if (! is_array($parsed) || empty($parsed['items'])) {
+            // Fallback：不用 search、用結構化 JSON 模式
+            $rawText = $this->callGeminiWithFallback($apiKey, $this->buildFallbackPrompt($storeName), useSearch: false);
+            $jsonText = $this->extractJson($rawText);
+            $parsed = json_decode($jsonText, true);
+            if (json_last_error() !== JSON_ERROR_NONE || ! is_array($parsed)) {
+                throw new RuntimeException(
+                    'AI 回的不是合法 JSON：' . substr($jsonText !== '' ? $jsonText : $rawText, 0, 300),
+                );
+            }
         }
 
         $items = $parsed['items'] ?? [];
@@ -209,25 +225,30 @@ class StoreMenuGenerationService
 PROMPT;
     }
 
-    private function callGeminiWithFallback(string $apiKey, string $prompt): string
+    private function callGeminiWithFallback(string $apiKey, string $prompt, bool $useSearch = false): string
     {
         $lastError = '';
         foreach (self::MODEL_FALLBACKS as $model) {
             try {
                 $endpoint = self::ENDPOINT_BASE . '/' . $model . ':generateContent?key=' . urlencode($apiKey);
-                // 注意：開啟 google_search tool 後，不能同時要求 responseMimeType=json
-                // 所以改成：讓 AI 用 markdown 包 JSON，後面 extractJson() 自己解
+
+                $payload = [
+                    'contents' => [['parts' => [['text' => $prompt]]]],
+                    'generationConfig' => [
+                        'temperature' => 0.3,
+                    ],
+                ];
+                if ($useSearch) {
+                    // search 模式：開 google_search tool，不能同時用 responseMimeType
+                    $payload['tools'] = [['google_search' => new \stdClass()]];
+                } else {
+                    // 快速模式：要求結構化 JSON 輸出
+                    $payload['generationConfig']['responseMimeType'] = 'application/json';
+                }
+
                 $response = Http::acceptJson()
-                    ->timeout(60)
-                    ->post($endpoint, [
-                        'contents' => [['parts' => [['text' => $prompt]]]],
-                        'tools' => [
-                            ['google_search' => new \stdClass()],
-                        ],
-                        'generationConfig' => [
-                            'temperature' => 0.3,
-                        ],
-                    ]);
+                    ->timeout($useSearch ? 50 : 30)
+                    ->post($endpoint, $payload);
 
                 if (! $response->successful()) {
                     $lastError = "model {$model} status {$response->status()}";
@@ -256,6 +277,55 @@ PROMPT;
         }
 
         throw new RuntimeException('AI 服務目前忙碌中，請稍後再試（' . $lastError . '）');
+    }
+
+    /**
+     * Fallback prompt：不用 search、純粹靠店名類型推測。
+     * 比 search 版本快很多（5-10 秒），適合搜尋失敗時的備援。
+     */
+    private function buildFallbackPrompt(string $storeName): string
+    {
+        $categoryList = implode(' / ', self::ALLOWED_CATEGORIES);
+
+        return <<<PROMPT
+你是台灣餐飲分析助手。給你一個台灣店家名稱，請根據店名判斷類型並列出該類型常見品項。
+
+店家名稱：{$storeName}
+
+判斷店類型的線索：
+- 店名含「便當/飯」→ 便當店：列雞腿便當、排骨便當、焢肉便當等台式便當
+- 店名含「麵/麵店/麵館」→ 麵店：列牛肉麵、陽春麵、肉燥飯、餛飩湯
+- 店名含「滷味/鹹酥雞」→ 滷味/鹹酥雞攤：列米血、豆乾、海帶、雞翅
+- 店名含「飲料/茶」→ 飲料店：列珍奶、紅茶、綠茶（每杯 700ml）
+- 店名含「咖啡/cafe」→ 咖啡店：列美式、拿鐵、卡布奇諾、輕食
+- 店名含「燒/烤」→ 燒烤店：列烤雞、烤肉飯、燒肉
+- 店名含「炒」→ 熱炒/小吃：列炒飯、炒麵、炒青菜
+- 店名含「壽司/丼/拉麵」→ 日式：列日式品項
+- 其他不明 → 列台灣綜合小吃
+
+請完全用以下 JSON 格式回應，不要加任何其他文字：
+{
+  "store_type": "你判斷的類型",
+  "items": [
+    {
+      "name": "品項名稱",
+      "calories": 整數,
+      "protein_g": 浮點數,
+      "fat_g": 浮點數,
+      "carbs_g": 浮點數,
+      "serving_unit": "份/碗/個/杯/塊",
+      "serving_size": 1.0,
+      "category": "{$categoryList} 之一"
+    }
+  ]
+}
+
+要求：
+- 列 15 個品項，按熱量低到高排序
+- 用台灣消費者熟悉的中文名稱
+- 數值合理（蛋白質 4 kcal/g、脂肪 9 kcal/g、碳水 4 kcal/g）
+- 不要列出店家可能沒賣的品項（例如便當店不會有日式定食）
+PROMPT;
     }
 
     /**

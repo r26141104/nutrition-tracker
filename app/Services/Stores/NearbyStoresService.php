@@ -55,9 +55,9 @@ class NearbyStoresService
     {
         $radius ??= self::DEFAULT_RADIUS_METERS;
 
-        // 快取 key：v2 = 擴大 query 範圍版本（含 way + shop + cuisine）
+        // 快取 key：v3 = 多抓 opening_hours / phone 欄位
         // 改 query 邏輯時記得 bump 版號，否則舊 cache 會擋住新結果
-        $cacheKey = sprintf('osm_nearby_v2:%.4f:%.4f:%d', $lat, $lon, $radius);
+        $cacheKey = sprintf('osm_nearby_v3:%.4f:%.4f:%d', $lat, $lon, $radius);
 
         $rawResults = Cache::remember(
             $cacheKey,
@@ -231,12 +231,38 @@ class NearbyStoresService
                 ?? ($tags['cuisine'] ? 'restaurant' : 'restaurant')
             );
 
+            // 嘗試多種電話 tag 格式（OSM 有不同習慣）
+            $phone = trim((string) (
+                $tags['phone']
+                ?? $tags['contact:phone']
+                ?? $tags['contact:mobile']
+                ?? ''
+            ));
+            // 把可能的多個電話用 ; 分隔的取第一個
+            if ($phone !== '' && str_contains($phone, ';')) {
+                $phone = trim(explode(';', $phone)[0]);
+            }
+
+            // 營業時間（OSM 格式，例：Mo-Fr 09:00-18:00; Sa 10:00-15:00）
+            $openingHours = trim((string) ($tags['opening_hours'] ?? ''));
+
+            // 網址（如果有）
+            $website = trim((string) (
+                $tags['website']
+                ?? $tags['contact:website']
+                ?? $tags['url']
+                ?? ''
+            ));
+
             $results[] = [
-                'osm_id'  => (int) ($el['id'] ?? 0),
-                'name'    => $name,
-                'amenity' => $amenityType,
-                'lat'     => (float) $rowLat,
-                'lon'     => (float) $rowLon,
+                'osm_id'        => (int) ($el['id'] ?? 0),
+                'name'          => $name,
+                'amenity'       => $amenityType,
+                'lat'           => (float) $rowLat,
+                'lon'           => (float) $rowLon,
+                'phone'         => $phone,
+                'opening_hours' => $openingHours,
+                'website'       => $website,
             ];
         }
 

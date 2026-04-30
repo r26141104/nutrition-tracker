@@ -19,6 +19,12 @@ export interface NearbyStore {
   } | null;
   /** 附近還有幾家同品牌分店（含當前這家）。例：1 = 只有這家、2 = 還有 1 家 */
   nearby_branch_count: number;
+  /** 電話（OSM 上有的話），可能為空字串 */
+  phone: string;
+  /** 營業時間（OSM 格式，例：Mo-Fr 09:00-18:00; Sa 10:00-15:00），可能為空字串 */
+  opening_hours: string;
+  /** 網址，可能為空字串 */
+  website: string;
 }
 
 interface NearbyWrap {
