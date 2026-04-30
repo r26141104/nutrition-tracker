@@ -323,6 +323,10 @@ function dietScoreColor(level: string): string {
         <span class="nav-icon">📍</span>
         <span class="nav-label">附近餐廳</span>
       </RouterLink>
+      <RouterLink to="/browse-meal" class="nav-pill">
+        <span class="nav-icon">🍽️</span>
+        <span class="nav-label">依餐別瀏覽</span>
+      </RouterLink>
     </nav>
 
     <p v-if="loading" class="state">載入中…</p>
@@ -983,7 +987,4 @@ function dietScoreColor(level: string): string {
 .meal-totals small { color: #64748b; font-weight: 400; margin-left: 6px; }
 .item-list { list-style: none; margin: 0; padding: 0; }
 .item-list li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 3px 0; font-size: 0.8125rem; color: #475569; }
-.item-name { color: #1f2937; }
-.item-qty { color: #94a3b8; font-variant-numeric: tabular-nums; }
-.item-cal { color: #0f172a; font-weight: 500; font-variant-numeric: tabular-nums; }
-</style>
+.item-name { co

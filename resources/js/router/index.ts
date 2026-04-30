@@ -136,6 +136,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/browse-meal',
+    name: 'browse-meal',
+    component: () => import('@/views/BrowseByMeal.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/stores/:id',
     name: 'store-detail',
     component: () => import('@/views/StoreDetail.vue'),
@@ -163,11 +169,3 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return { name: 'login' };
-  }
-  if (to.meta.guestOnly && auth.isAuthenticated) {
-    return { name: 'dashboard' };
-  }
-});
-
-export default router;
