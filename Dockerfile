@@ -58,10 +58,16 @@ RUN composer dump-autoload --optimize \
 ENV PORT=10000
 EXPOSE 10000
 
-# 啟動指令：cache config → 跑 migration → 啟動 PHP 內建 server
-# migration 是 idempotent，重啟跑沒副作用
+# 啟動指令：
+#   1. cache config / route / view（提速）
+#   2. 跑 migration（idempotent，已跑過會跳過）
+#   3. 跑 FoodSeeder + ChainStoreSeeder（用 firstOrCreate，重跑不會重複建立）
+#   4. 啟動 PHP 內建 server
+# 因為 Render Free 方案沒 SSH，用這個方式確保部署後資料庫一定有 seed 資料
 CMD php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache \
     && php artisan migrate --force \
+    && php artisan db:seed --force --class=FoodSeeder \
+    && php artisan db:seed --force --class=ChainStoreSeeder \
     && php -S 0.0.0.0:${PORT} -t public public/index.php
