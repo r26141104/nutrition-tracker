@@ -171,4 +171,66 @@ a.btn-primary:hover, a.btn-secondary:hover {
   * { transition: none !important; }
 }
 
-/* =====
+/* ==================== 暗色主題 ==================== */
+[data-theme="dark"] body {
+  background:
+    linear-gradient(135deg,
+      #0f172a 0%,
+      #1e1b4b 25%,
+      #2e1065 50%,
+      #1e1b4b 75%,
+      #0f172a 100%
+    );
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .bg-orb-1 { background: radial-gradient(circle, #064e3b 0%, transparent 70%); opacity: 0.4; }
+[data-theme="dark"] .bg-orb-2 { background: radial-gradient(circle, #4c1d95 0%, transparent 70%); opacity: 0.4; }
+[data-theme="dark"] .bg-orb-3 { background: radial-gradient(circle, #831843 0%, transparent 70%); opacity: 0.4; }
+
+[data-theme="dark"] .card {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: rgba(71, 85, 105, 0.5) !important;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4 { color: #f1f5f9; }
+
+[data-theme="dark"] p,
+[data-theme="dark"] span,
+[data-theme="dark"] li,
+[data-theme="dark"] label { color: #cbd5e1; }
+
+[data-theme="dark"] small { color: #94a3b8; }
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border-color: rgba(71, 85, 105, 0.6) !important;
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder { color: #64748b; }
+
+[data-theme="dark"] .nav-pill {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: rgba(71, 85, 105, 0.5) !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .nav-pill:hover {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(67, 56, 202, 0.4)) !important;
+  color: #c7d2fe !important;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+[data-theme="dark"] .el-card { background: rgba(30, 41, 59, 0.85) !important; color: #e2e8f0; }
+[data-theme="dark"] .el-progress__text { color: #e2e8f0 !important; }
+[data-theme="dark"] button:disabled { color: #64748b; }
+</style
