@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'osm_match_keywords',
     'confidence_level',
     'description',
+    'default_opening_hours',
 ])]
 class Store extends Model
 {

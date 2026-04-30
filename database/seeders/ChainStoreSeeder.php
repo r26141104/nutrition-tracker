@@ -28,14 +28,20 @@ class ChainStoreSeeder extends Seeder
             $store = Store::firstOrCreate(
                 ['slug' => $storeRow['slug']],
                 [
-                    'name'               => $storeRow['name'],
-                    'category'           => $storeRow['category'],
-                    'logo_emoji'         => $storeRow['logo_emoji'],
-                    'osm_match_keywords' => $storeRow['osm_match_keywords'],
-                    'confidence_level'   => $storeRow['menu_confidence'] ?? 'high',
-                    'description'        => $storeRow['description'],
+                    'name'                  => $storeRow['name'],
+                    'category'              => $storeRow['category'],
+                    'logo_emoji'            => $storeRow['logo_emoji'],
+                    'osm_match_keywords'    => $storeRow['osm_match_keywords'],
+                    'confidence_level'      => $storeRow['menu_confidence'] ?? 'high',
+                    'description'           => $storeRow['description'],
+                    'default_opening_hours' => $storeRow['default_opening_hours'] ?? null,
                 ],
             );
+
+            // 重跑 seed 時也要把已有的 store 補上 default_opening_hours
+            if (! empty($storeRow['default_opening_hours']) && empty($store->default_opening_hours)) {
+                $store->update(['default_opening_hours' => $storeRow['default_opening_hours']]);
+            }
 
             foreach ($storeRow['menu'] as $item) {
                 Food::firstOrCreate(
@@ -77,6 +83,7 @@ class ChainStoreSeeder extends Seeder
                 'name' => '麥當勞', 'slug' => 'mcdonalds',
                 'category' => 'fast_food', 'logo_emoji' => '🍔',
                 'description' => '全球最大速食連鎖。涵蓋早餐、漢堡、雞塊、薯條、冰品。',
+                'default_opening_hours' => '每日 06:00 – 24:00（部分分店 24 小時）',
                 'osm_match_keywords' => ['麥當勞', "McDonald's", 'McDonalds', 'MCDONALDS', '麥當勞餐廳'],
                 'menu' => [
                     // 早餐
@@ -126,6 +133,7 @@ class ChainStoreSeeder extends Seeder
                 'name' => '肯德基', 'slug' => 'kfc',
                 'category' => 'fast_food', 'logo_emoji' => '🍗',
                 'description' => '炸雞為主的速食連鎖，名菜包含香酥脆雞、紐奧良烤雞與葡式蛋撻。',
+                'default_opening_hours' => '每日 10:00 – 22:00',
                 'osm_match_keywords' => ['肯德基', 'KFC', 'Kentucky', '肯德基餐廳'],
                 'menu' => [
                     // 雞肉
@@ -171,6 +179,7 @@ class ChainStoreSeeder extends Seeder
                 'name' => '摩斯漢堡', 'slug' => 'mos-burger',
                 'category' => 'fast_food', 'logo_emoji' => '🍔',
                 'description' => '日系速食連鎖，以米漢堡與蔬菜量大聞名。',
+                'default_opening_hours' => '每日 07:00 – 22:00',
                 'osm_match_keywords' => ['摩斯', '摩斯漢堡', 'MOS Burger', 'MOS', 'モスバーガー'],
                 'menu' => [
                     // 經典漢堡
@@ -209,6 +218,7 @@ class ChainStoreSeeder extends Seeder
                 'name' => '星巴克', 'slug' => 'starbucks',
                 'category' => 'drink', 'logo_emoji' => '☕',
                 'description' => '美式咖啡連鎖。中杯為標準容量 360ml（12oz）。',
+                'default_opening_hours' => '每日 07:00 – 22:00',
                 'osm_match_keywords' => ['星巴克', 'Starbucks', 'STARBUCKS'],
                 'menu' => [
                     // 咖啡
@@ -250,6 +260,7 @@ class ChainStoreSeeder extends Seeder
                 'name' => '85度C', 'slug' => '85cafe',
                 'category' => 'drink', 'logo_emoji' => '🍰',
                 'description' => '台灣本土咖啡 + 烘焙連鎖。蛋糕、麵包、咖啡、茶飲一應俱全。',
+                'default_opening_hours' => '每日 07:00 – 22:00',
                 'osm_match_keywords' => ['85度C', '85度c', '85°C', '85度C咖啡', '85 度 C', '85cafe'],
                 'menu' => [
                     // 咖啡
@@ -288,6 +299,7 @@ class ChainStoreSeeder extends Seeder
                 'name' => '路易莎', 'slug' => 'louisa',
                 'category' => 'drink', 'logo_emoji' => '☕',
                 'description' => '台灣本土平價咖啡連鎖，以單品咖啡與輕食為主。',
+                'default_opening_hours' => '每日 07:00 – 22:00',
                 'osm_match_keywords' => ['路易莎', 'Louisa', 'LOUISA', '路易莎咖啡'],
                 'menu' => [
                     // 咖啡
@@ -325,6 +337,7 @@ class ChainStoreSeeder extends Seeder
                 'category' => 'drink', 'logo_emoji' => '🧋',
                 'description' => '台灣最大手搖飲連鎖。標示為大杯 700ml、全糖正常冰，可視糖度調整熱量（半糖約 -25%、無糖約 -50%）。',
                 'menu_confidence' => 'medium',
+                'default_opening_hours' => '每日 10:00 – 22:00',
                 'osm_match_keywords' => ['清心福全', '清心', 'Ching Shin'],
                 'menu' => [
                     // 純茶
@@ -366,6 +379,7 @@ class ChainStoreSeeder extends Seeder
                 'category' => 'drink', 'logo_emoji' => '🧋',
                 'description' => '台灣手搖飲指標品牌。標示為大杯 700ml、全糖正常冰。',
                 'menu_confidence' => 'medium',
+                'default_opening_hours' => '每日 10:00 – 22:00',
                 'osm_match_keywords' => ['50嵐', '50 嵐', '50Lan'],
                 'menu' => [
                     // 經典奶茶
@@ -406,6 +420,7 @@ class ChainStoreSeeder extends Seeder
                 'name' => '八方雲集', 'slug' => '8way',
                 'category' => 'noodle', 'logo_emoji' => '🥟',
                 'description' => '台灣鍋貼水餃連鎖。',
+                'default_opening_hours' => '每日 10:00 – 22:00',
                 'osm_match_keywords' => ['八方雲集', '八方', '8way', 'Bafang'],
                 'menu' => [
                     // 鍋貼
@@ -443,6 +458,7 @@ class ChainStoreSeeder extends Seeder
                 'name' => '三商巧福', 'slug' => 'sanshang',
                 'category' => 'noodle', 'logo_emoji' => '🍜',
                 'description' => '台灣牛肉麵連鎖。',
+                'default_opening_hours' => '每日 10:00 – 22:00',
                 'osm_match_keywords' => ['三商巧福', '三商', 'Sanshang'],
                 'menu' => [
                     // 牛肉麵

@@ -77,6 +77,12 @@ class NearbyStoresService
 
             $matched = $this->matchToStore($name, $allStores);
 
+            // 營業時間優先順序：OSM > 連鎖店預設 > 空字串
+            $openingHours = $row['opening_hours'] ?? '';
+            if ($openingHours === '' && $matched && $matched->default_opening_hours) {
+                $openingHours = $matched->default_opening_hours;
+            }
+
             $results[] = [
                 'osm_id'        => $row['osm_id'],
                 'name'          => $name,
@@ -84,6 +90,9 @@ class NearbyStoresService
                 'lat'           => $row['lat'],
                 'lon'           => $row['lon'],
                 'distance_m'    => (int) round($distance),
+                'phone'         => $row['phone'] ?? '',
+                'opening_hours' => $openingHours,
+                'website'       => $row['website'] ?? '',
                 'matched_store' => $matched ? [
                     'id'         => $matched->id,
                     'name'       => $matched->name,
