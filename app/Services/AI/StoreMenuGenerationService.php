@@ -67,9 +67,14 @@ class StoreMenuGenerationService
 
         $rawText = $this->callGeminiWithFallback($apiKey, $this->buildPrompt($storeName));
 
-        $parsed = json_decode($rawText, true);
+        // 因為開了 google_search，AI 會回 markdown + JSON 混合，要從文字裡抽出 JSON
+        $jsonText = $this->extractJson($rawText);
+
+        $parsed = json_decode($jsonText, true);
         if (json_last_error() !== JSON_ERROR_NONE || ! is_array($parsed)) {
-            throw new RuntimeException('AI 回的不是合法 JSON：' . substr($rawText, 0, 200));
+            throw new RuntimeException(
+                'AI 回的不是合法 JSON：' . substr($jsonText !== '' ? $jsonText : $rawText, 0, 300),
+            );
         }
 
         $items = $parsed['items'] ?? [];
@@ -153,13 +158,21 @@ class StoreMenuGenerationService
         $categoryList = implode(' / ', self::ALLOWED_CATEGORIES);
 
         return <<<PROMPT
-你是台灣餐飲分析助手。我會給你一個台灣店家名稱，請你推測這是什麼類型的店，並列出該類型最常見的菜單品項。
+你是台灣餐飲分析助手，可以使用 Google 搜尋。
+
+我會給你一個**台灣店家名稱**。你的任務分兩步：
+
+【步驟 1】用 Google 搜尋這家店的實際菜單
+搜尋詞建議：「{$storeName} 菜單」、「{$storeName} 價目表」、「{$storeName} 評論」、「{$storeName} 招牌」
+從搜尋結果（Google Maps 評論、部落格、店家粉絲頁、外送平台）找出**這家店實際在賣什麼**。
+
+【步驟 2】根據搜尋結果，列出 15-20 個**這家店真實會賣的品項**並估算營養成分。
 
 店家名稱：{$storeName}
 
-請完全用以下 JSON 格式回應，不要加任何其他文字：
+請最後用以下 JSON 格式回應（可以在 JSON 之前先用幾句話說明你搜尋到什麼，然後用 ```json ... ``` 包住 JSON）：
 {
-  "store_type": "簡短說明你判斷的店類型",
+  "store_type": "簡短說明這家店真實的類型（例如：日式便當店、麵店、咖啡廳）",
   "items": [
     {
       "name": "品項名稱",
@@ -167,7 +180,7 @@ class StoreMenuGenerationService
       "protein_g": 浮點數,
       "fat_g": 浮點數,
       "carbs_g": 浮點數,
-      "serving_unit": "份/個/碗/支/塊/碗/盤/杯",
+      "serving_unit": "份/個/碗/支/塊/盤/杯",
       "serving_size": 浮點數（份量數值，預設 1）,
       "category": "{$categoryList} 之一"
     }
@@ -175,20 +188,24 @@ class StoreMenuGenerationService
 }
 
 要求：
-- 列出 15 到 20 個最常見品項，按熱量由低到高排序
-- 用台灣消費者熟悉的品項名稱（例如：米血糕、鴨翅、王子麵、滷蛋、蛋餅、肉燥飯、牛肉麵）
-- 每個品項是「實際點餐時的單位份量」（如：滷味一塊、麵一碗、便當一份）
-- 數值為合理估算，誤差 ±20% 屬正常
-- 各種店家類型應對：
-   * 滷味/鹹酥雞 → 列各式滷味品項（每份 1 顆/塊）
-   * 麵店 → 列各式麵類（每份 1 碗）
-   * 便當店 → 列便當組合（每份 1 個便當）
-   * 早餐店 → 列三明治、蛋餅、漢堡（每份 1 份）
-   * 飲料店 → 列各式飲品（每份 1 杯 700ml）
-   * 自助餐 → 列常見配菜（每份 1 份）
-   * 夜市/小吃 → 列鹹酥雞、章魚燒、地瓜球等（每份 1 份）
-- 如果店名太模糊（例如「阿姨的店」），store_type 設為「綜合小吃店」並列台灣常見小吃
-- 數值務必合理：calories ≥ 0，protein_g + fat_g + carbs_g 對應的熱量應接近 calories（蛋白質/碳水 4 kcal/g、脂肪 9 kcal/g）
+- **務必先用 Google 搜尋這家店的實際菜單再回答**，不要憑店名猜測
+- 列出 15 到 20 個品項，**優先列搜尋結果中真的有看到的品項**
+- 如果搜尋找到部分品項但不到 15 個，補上**該店類型最常見的台灣品項**湊滿
+- 如果搜尋完全沒有資料（例如店家很冷門），明確在 store_type 標明「無法搜尋到資料，以店名類型推測」，再列該類型的常見台灣品項
+- 用台灣消費者熟悉的品項名稱（例：米血糕、鴨翅、王子麵、滷蛋、蛋餅、肉燥飯、牛肉麵、雞腿便當、招牌奶茶）
+- 每個品項是「實際點餐時的單位份量」（滷味一塊、麵一碗、便當一份、飲料一杯）
+- 按熱量由低到高排序
+- 數值務必合理：誤差 ±20% 屬正常，但 protein_g + fat_g + carbs_g 對應的熱量應接近 calories（蛋白質/碳水 4 kcal/g、脂肪 9 kcal/g）
+
+回應格式範例：
+"我搜尋了「飯島屋 菜單」，從外送平台看到這家店主要賣日式便當，招牌是雞腿便當、豬排便當..."
+
+```json
+{
+  "store_type": "...",
+  "items": [...]
+}
+```
 PROMPT;
     }
 
@@ -198,13 +215,17 @@ PROMPT;
         foreach (self::MODEL_FALLBACKS as $model) {
             try {
                 $endpoint = self::ENDPOINT_BASE . '/' . $model . ':generateContent?key=' . urlencode($apiKey);
+                // 注意：開啟 google_search tool 後，不能同時要求 responseMimeType=json
+                // 所以改成：讓 AI 用 markdown 包 JSON，後面 extractJson() 自己解
                 $response = Http::acceptJson()
-                    ->timeout(45)
+                    ->timeout(60)
                     ->post($endpoint, [
                         'contents' => [['parts' => [['text' => $prompt]]]],
+                        'tools' => [
+                            ['google_search' => new \stdClass()],
+                        ],
                         'generationConfig' => [
-                            'temperature'      => 0.3,
-                            'responseMimeType' => 'application/json',
+                            'temperature' => 0.3,
                         ],
                     ]);
 
@@ -235,6 +256,40 @@ PROMPT;
         }
 
         throw new RuntimeException('AI 服務目前忙碌中，請稍後再試（' . $lastError . '）');
+    }
+
+    /**
+     * 從 AI 回應的 markdown 文字中抽出 JSON。
+     *
+     * AI 開了 search grounding 之後，回應通常長這樣：
+     *   "我搜尋了xxx，找到這家店是yyy...
+     *
+     *   ```json
+     *   { ... }
+     *   ```
+     *   "
+     *
+     * 抽取邏輯：
+     *   1. 優先抓 ```json ... ``` 區塊
+     *   2. fallback 抓第一個 { 到最後一個 } 之間的內容
+     */
+    private function extractJson(string $text): string
+    {
+        // 嘗試 ```json ... ``` markdown 區塊
+        if (preg_match('/```json\s*(.*?)\s*```/s', $text, $matches)) {
+            return trim($matches[1]);
+        }
+        // fallback：```...``` 任意語言標籤
+        if (preg_match('/```\w*\s*(.*?)\s*```/s', $text, $matches)) {
+            return trim($matches[1]);
+        }
+        // fallback：第一個 { 到最後一個 }
+        $firstBrace = strpos($text, '{');
+        $lastBrace = strrpos($text, '}');
+        if ($firstBrace !== false && $lastBrace !== false && $lastBrace > $firstBrace) {
+            return substr($text, $firstBrace, $lastBrace - $firstBrace + 1);
+        }
+        return trim($text);
     }
 
     private function guessCategory(string $storeType): string
