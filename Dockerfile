@@ -70,4 +70,4 @@ CMD php artisan config:cache \
     && php artisan migrate --force \
     && php artisan db:seed --force --class=FoodSeeder \
     && php artisan db:seed --force --class=ChainStoreSeeder \
-    && php -S 0.0.0.0:${PORT} -t public public/index.php
+    && php -S 0.0.0.0:${PORT} -t public public/router.php
