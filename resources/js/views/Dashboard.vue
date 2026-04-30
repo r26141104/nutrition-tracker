@@ -802,9 +802,27 @@ function dietScoreColor(level: string): string {
 
 .welcome h2 { font-size: 1.25rem; margin: 0 0 16px; color: #0f172a; }
 
-.quick-nav { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-.nav-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 999px; text-decoration: none; color: #334155; font-size: 0.9375rem; transition: all 0.15s; }
-.nav-pill:hover { border-color: #0ea5e9; color: #0ea5e9; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(14,165,233,0.15); }
+.quick-nav { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.nav-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 18px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  border-radius: 999px;
+  text-decoration: none; color: #334155;
+  font-size: 0.9375rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.nav-pill:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #4f46e5;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(238, 242, 255, 0.95));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+}
 .nav-icon { font-size: 1.125rem; }
 .nav-label { font-weight: 500; }
 
