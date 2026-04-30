@@ -53,9 +53,20 @@ class GeocodingService
 
     /**
      * 呼叫 Nominatim API。
+     *
+     * Nominatim 使用條款：
+     *   - 1 req/sec
+     *   - 必須帶 User-Agent
+     *   - 不能拿來做大量批次查詢
+     *
+     * 為了禮貌使用，發請求前先等 1 秒（避免短時間內連發）。
+     * 收到 429 時用更友善的訊息。
      */
     private function callNominatim(string $query): array
     {
+        // Nominatim 速率限制：禮貌等待 1 秒，避免被 ban
+        usleep(1_100_000); // 1.1 秒
+
         try {
             $response = Http::acceptJson()
                 ->timeout(15)
@@ -78,26 +89,17 @@ class GeocodingService
             throw new RuntimeException('地址查詢服務暫時無法使用，請稍後再試。');
         }
 
+        // 429 = 限流，給友善訊息
+        if ($response->status() === 429) {
+            Log::info('Nominatim rate limited', ['query' => $query]);
+            throw new RuntimeException(
+                '地址搜尋次數過多，OpenStreetMap 服務正在限流。請等 30 秒後再試，或暫時改用「📍 我的位置」。',
+            );
+        }
+
         if (! $response->successful()) {
             Log::warning('Nominatim returned error', [
                 'status' => $response->status(),
                 'body'   => substr($response->body(), 0, 500),
             ]);
-            throw new RuntimeException('地址查詢失敗（status: ' . $response->status() . '）');
-        }
-
-        $body = $response->json();
-        if (! is_array($body) || count($body) === 0) {
-            throw new RuntimeException('找不到這個地址或地名，請試試其他關鍵字（例如：台北車站、信義誠品、北市中正區忠孝東路）。');
-        }
-
-        $top = $body[0];
-        return [
-            'lat'          => (float) ($top['lat'] ?? 0),
-            'lon'          => (float) ($top['lon'] ?? 0),
-            'display_name' => (string) ($top['display_name'] ?? $query),
-            'type'         => (string) ($top['type'] ?? 'unknown'),
-            'importance'   => (float) ($top['importance'] ?? 0),
-        ];
-    }
-}
+            throw 

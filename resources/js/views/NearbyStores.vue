@@ -223,31 +223,50 @@ function initMap(): void {
     maxZoom: 19,
   }).addTo(map);
 
-  // 中心位置：藍點（GPS 或 搜尋的地址）
+  // 中心位置：大藍點 + 白邊（最顯眼）
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (L as any).circleMarker([myLat.value, myLon.value], {
-    radius: 8,
-    color: '#0ea5e9',
+    radius: 10,
+    color: '#ffffff',
+    weight: 3,
     fillColor: '#0ea5e9',
-    fillOpacity: 0.9,
-  }).addTo(map).bindPopup(locationLabel.value);
+    fillOpacity: 1.0,
+  }).addTo(map).bindPopup(`<b>${locationLabel.value}</b>`);
 
-  // 所有店家
-  for (const s of stores.value) {
-    const isMatched = s.matched_store !== null;
-    const color = isMatched ? '#7c3aed' : '#64748b';
+  // 所有店家：先放灰點（其他餐廳），再放紫點（連鎖店），紫點蓋過灰點
+  // 這樣顯示順序確保連鎖店（更重要）總是在最上層可見
+  const otherStores = stores.value.filter((s) => !s.matched_store);
+  const matchedStores = stores.value.filter((s) => s.matched_store);
+
+  // 灰點：其他餐廳
+  for (const s of otherStores) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (L as any).circleMarker([s.lat, s.lon], {
-      radius: 7,
-      color,
-      fillColor: color,
-      fillOpacity: 0.7,
-      weight: 2,
+      radius: 6,
+      color: '#ffffff',
+      weight: 1.5,
+      fillColor: '#94a3b8',
+      fillOpacity: 0.85,
     })
       .addTo(map)
       .bindPopup(
-        `<b>${s.name}</b><br>${AMENITY_LABEL[s.amenity] ?? s.amenity}・${s.distance_m} m`
-        + (isMatched ? `<br>✨ 已收錄菜單` : ''),
+        `<b>${s.name}</b><br>${AMENITY_LABEL[s.amenity] ?? s.amenity}・${s.distance_m} m`,
+      );
+  }
+
+  // 紫點：有完整菜單（蓋在最上層、半徑大一點顯眼）
+  for (const s of matchedStores) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (L as any).circleMarker([s.lat, s.lon], {
+      radius: 9,
+      color: '#ffffff',
+      weight: 2.5,
+      fillColor: '#7c3aed',
+      fillOpacity: 1.0,
+    })
+      .addTo(map)
+      .bindPopup(
+        `<b>✨ ${s.name}</b><br>${AMENITY_LABEL[s.amenity] ?? s.amenity}・${s.distance_m} m<br>已收錄菜單`,
       );
   }
 
@@ -565,26 +584,3 @@ function retryLocation(): void {
   background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd;
   padding: 7px 12px; border-radius: 8px;
   font-size: 0.8125rem; cursor: pointer;
-  text-decoration: none; font-weight: 500;
-  white-space: nowrap;
-}
-.btn-ai:hover:not(:disabled) { background: #ddd6fe; }
-.btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.error-banner {
-  display: flex; align-items: center; justify-content: space-between;
-  background: #fef2f2; border: 1px solid #fecaca;
-  color: #b91c1c; padding: 12px 16px; border-radius: 8px;
-  margin: 12px 0; font-size: 0.875rem;
-}
-.error-close {
-  background: transparent; border: 0; color: #b91c1c;
-  cursor: pointer; padding: 0 8px; font-size: 1rem;
-}
-.error-close:hover { color: #7f1d1d; }
-
-.empty {
-  padding: 32px; text-align: center; color: #94a3b8;
-  background: white; border: 1px dashed #cbd5e1; border-radius: 10px;
-}
-</style>
