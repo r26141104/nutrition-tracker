@@ -102,4 +102,21 @@ class GeocodingService
                 'status' => $response->status(),
                 'body'   => substr($response->body(), 0, 500),
             ]);
-            throw 
+            throw new RuntimeException('地址查詢失敗（status: ' . $response->status() . '）');
+        }
+
+        $body = $response->json();
+        if (! is_array($body) || count($body) === 0) {
+            throw new RuntimeException('找不到這個地址或地名，請試試其他關鍵字（例如：台北車站、信義誠品、北市中正區忠孝東路）。');
+        }
+
+        $top = $body[0];
+        return [
+            'lat'          => (float) ($top['lat'] ?? 0),
+            'lon'          => (float) ($top['lon'] ?? 0),
+            'display_name' => (string) ($top['display_name'] ?? $query),
+            'type'         => (string) ($top['type'] ?? 'unknown'),
+            'importance'   => (float) ($top['importance'] ?? 0),
+        ];
+    }
+}

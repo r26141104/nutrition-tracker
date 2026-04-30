@@ -485,6 +485,239 @@ class ChainStoreSeeder extends Seeder
                     ['name' => '滷味拼盤',              'calories' => 280, 'protein_g' => 18, 'fat_g' => 14, 'carbs_g' => 18,  'serving_unit' => '份'],
                 ],
             ],
+
+            // ==========================================================
+            // 7-11
+            // ==========================================================
+            [
+                'name' => '7-11', 'slug' => 'seven-eleven',
+                'category' => 'convenience', 'logo_emoji' => '🏪',
+                'description' => '全台最大便利商店連鎖，24 小時營業，熱食、御飯糰、便當、咖啡、零食一應俱全。',
+                'default_opening_hours' => '24 小時營業',
+                'osm_match_keywords' => ['7-11', '7-Eleven', 'Seven Eleven', '統一超商', '小七'],
+                'menu' => [
+                    ['name' => '茶葉蛋',                'calories' => 75,  'protein_g' => 7,  'fat_g' => 5,   'carbs_g' => 0.6, 'serving_unit' => '顆'],
+                    ['name' => '御飯糰 鮪魚',           'calories' => 195, 'protein_g' => 6,  'fat_g' => 4,   'carbs_g' => 35,  'serving_unit' => '個'],
+                    ['name' => '御飯糰 鮭魚',           'calories' => 210, 'protein_g' => 8,  'fat_g' => 5,   'carbs_g' => 33,  'serving_unit' => '個'],
+                    ['name' => '御飯糰 燒肉',           'calories' => 220, 'protein_g' => 7,  'fat_g' => 6,   'carbs_g' => 35,  'serving_unit' => '個'],
+                    ['name' => '大亨堡',                'calories' => 310, 'protein_g' => 12, 'fat_g' => 18,  'carbs_g' => 28,  'serving_unit' => '個'],
+                    ['name' => '雞腿便當',              'calories' => 720, 'protein_g' => 32, 'fat_g' => 28,  'carbs_g' => 85,  'serving_unit' => '份', 'category' => 'rice_box'],
+                    ['name' => '排骨便當',              'calories' => 760, 'protein_g' => 28, 'fat_g' => 32,  'carbs_g' => 88,  'serving_unit' => '份', 'category' => 'rice_box'],
+                    ['name' => '義大利麵 起司白醬',     'calories' => 540, 'protein_g' => 18, 'fat_g' => 22,  'carbs_g' => 68,  'serving_unit' => '盒'],
+                    ['name' => '關東煮 高麗菜捲',       'calories' => 60,  'protein_g' => 3,  'fat_g' => 1,   'carbs_g' => 10,  'serving_unit' => '個'],
+                    ['name' => '關東煮 米血',           'calories' => 145, 'protein_g' => 4,  'fat_g' => 1,   'carbs_g' => 30,  'serving_unit' => '塊'],
+                    ['name' => '關東煮 玉米',           'calories' => 80,  'protein_g' => 2,  'fat_g' => 1,   'carbs_g' => 18,  'serving_unit' => '塊'],
+                    ['name' => 'CITY CAFE 美式 中杯',   'calories' => 5,   'protein_g' => 0,  'fat_g' => 0,   'carbs_g' => 1,   'serving_unit' => '杯'],
+                    ['name' => 'CITY CAFE 拿鐵 中杯',   'calories' => 230, 'protein_g' => 12, 'fat_g' => 12,  'carbs_g' => 18,  'serving_unit' => '杯'],
+                    ['name' => '茶碗蒸',                'calories' => 110, 'protein_g' => 7,  'fat_g' => 5,   'carbs_g' => 9,   'serving_unit' => '個'],
+                ],
+            ],
+
+            // ==========================================================
+            // 全家
+            // ==========================================================
+            [
+                'name' => '全家', 'slug' => 'family-mart',
+                'category' => 'convenience', 'logo_emoji' => '🏪',
+                'description' => '台灣第二大便利商店連鎖，24 小時營業，特色為烤地瓜、Let\'s Café。',
+                'default_opening_hours' => '24 小時營業',
+                'osm_match_keywords' => ['全家', '全家便利商店', 'FamilyMart', 'Family Mart'],
+                'menu' => [
+                    ['name' => '茶葉蛋',                'calories' => 75,  'protein_g' => 7,  'fat_g' => 5,   'carbs_g' => 0.6, 'serving_unit' => '顆'],
+                    ['name' => '御飯糰 鮪魚',           'calories' => 195, 'protein_g' => 6,  'fat_g' => 4,   'carbs_g' => 35,  'serving_unit' => '個'],
+                    ['name' => '烤地瓜 一條',           'calories' => 220, 'protein_g' => 4,  'fat_g' => 0.5, 'carbs_g' => 50,  'serving_unit' => '條'],
+                    ['name' => '日式炸雞便當',          'calories' => 740, 'protein_g' => 30, 'fat_g' => 30,  'carbs_g' => 85,  'serving_unit' => '份', 'category' => 'rice_box'],
+                    ['name' => '香烤雞腿便當',          'calories' => 680, 'protein_g' => 32, 'fat_g' => 22,  'carbs_g' => 90,  'serving_unit' => '份', 'category' => 'rice_box'],
+                    ['name' => '焗烤系列',              'calories' => 480, 'protein_g' => 18, 'fat_g' => 22,  'carbs_g' => 52,  'serving_unit' => '盒'],
+                    ['name' => '蛋餅',                  'calories' => 280, 'protein_g' => 9,  'fat_g' => 12,  'carbs_g' => 35,  'serving_unit' => '個'],
+                    ['name' => '三明治 火腿蛋',         'calories' => 320, 'protein_g' => 14, 'fat_g' => 15,  'carbs_g' => 32,  'serving_unit' => '個', 'category' => 'snack'],
+                    ['name' => "Let's Café 美式 中杯", 'calories' => 5,   'protein_g' => 0,  'fat_g' => 0,   'carbs_g' => 1,   'serving_unit' => '杯'],
+                    ['name' => "Let's Café 拿鐵 中杯", 'calories' => 220, 'protein_g' => 11, 'fat_g' => 11,  'carbs_g' => 18,  'serving_unit' => '杯'],
+                    ['name' => '霜淇淋',                'calories' => 160, 'protein_g' => 3,  'fat_g' => 5,   'carbs_g' => 26,  'serving_unit' => '支'],
+                    ['name' => '布丁',                  'calories' => 180, 'protein_g' => 4,  'fat_g' => 6,   'carbs_g' => 28,  'serving_unit' => '個'],
+                ],
+            ],
+
+            // ==========================================================
+            // 鬍鬚張
+            // ==========================================================
+            [
+                'name' => '鬍鬚張', 'slug' => 'formosa-chang',
+                'category' => 'rice_box', 'logo_emoji' => '🍚',
+                'description' => '台灣魯肉飯名店連鎖，特色為香醇魯肉、雞肉飯。',
+                'default_opening_hours' => '每日 10:00 – 22:00',
+                'osm_match_keywords' => ['鬍鬚張', 'Hu Hsu Chang', 'Formosa Chang'],
+                'menu' => [
+                    ['name' => '招牌魯肉飯 大碗',       'calories' => 650, 'protein_g' => 20, 'fat_g' => 26, 'carbs_g' => 80,  'serving_unit' => '碗'],
+                    ['name' => '招牌魯肉飯 小碗',       'calories' => 450, 'protein_g' => 14, 'fat_g' => 18, 'carbs_g' => 56,  'serving_unit' => '碗'],
+                    ['name' => '雞肉飯 大碗',           'calories' => 580, 'protein_g' => 25, 'fat_g' => 18, 'carbs_g' => 78,  'serving_unit' => '碗'],
+                    ['name' => '雞肉飯 小碗',           'calories' => 400, 'protein_g' => 18, 'fat_g' => 12, 'carbs_g' => 55,  'serving_unit' => '碗'],
+                    ['name' => '雞腿便當',              'calories' => 820, 'protein_g' => 38, 'fat_g' => 30, 'carbs_g' => 95,  'serving_unit' => '份'],
+                    ['name' => '排骨便當',              'calories' => 880, 'protein_g' => 32, 'fat_g' => 38, 'carbs_g' => 95,  'serving_unit' => '份'],
+                    ['name' => '香腸 一條',             'calories' => 220, 'protein_g' => 10, 'fat_g' => 17, 'carbs_g' => 6,   'serving_unit' => '條', 'category' => 'snack'],
+                    ['name' => '燙青菜',                'calories' => 60,  'protein_g' => 2,  'fat_g' => 3,  'carbs_g' => 6,   'serving_unit' => '份'],
+                    ['name' => '滷蛋',                  'calories' => 80,  'protein_g' => 7,  'fat_g' => 5,  'carbs_g' => 1,   'serving_unit' => '顆'],
+                    ['name' => '貢丸湯',                'calories' => 130, 'protein_g' => 8,  'fat_g' => 7,  'carbs_g' => 8,   'serving_unit' => '碗'],
+                    ['name' => '味噌湯',                'calories' => 50,  'protein_g' => 3,  'fat_g' => 2,  'carbs_g' => 5,   'serving_unit' => '碗'],
+                ],
+            ],
+
+            // ==========================================================
+            // 早安美芝城（早餐連鎖）
+            // ==========================================================
+            [
+                'name' => '早安美芝城', 'slug' => 'mei-zhi-cheng',
+                'category' => 'fast_food', 'logo_emoji' => '🍳',
+                'description' => '台灣早餐連鎖，蛋餅、漢堡、奶茶為主。',
+                'default_opening_hours' => '每日 06:00 – 13:00',
+                'osm_match_keywords' => ['早安美芝城', '美芝城', 'Mei Zhi Cheng'],
+                'menu' => [
+                    ['name' => '原味蛋餅',              'calories' => 280, 'protein_g' => 9,  'fat_g' => 12, 'carbs_g' => 35,  'serving_unit' => '個'],
+                    ['name' => '玉米蛋餅',              'calories' => 320, 'protein_g' => 10, 'fat_g' => 13, 'carbs_g' => 40,  'serving_unit' => '個'],
+                    ['name' => '起司蛋餅',              'calories' => 350, 'protein_g' => 13, 'fat_g' => 18, 'carbs_g' => 36,  'serving_unit' => '個'],
+                    ['name' => '培根蛋餅',              'calories' => 380, 'protein_g' => 14, 'fat_g' => 20, 'carbs_g' => 36,  'serving_unit' => '個'],
+                    ['name' => '燻雞起司漢堡',          'calories' => 480, 'protein_g' => 22, 'fat_g' => 22, 'carbs_g' => 48,  'serving_unit' => '個'],
+                    ['name' => '豬排堡',                'calories' => 520, 'protein_g' => 25, 'fat_g' => 24, 'carbs_g' => 50,  'serving_unit' => '個'],
+                    ['name' => '鐵板麵 黑胡椒',         'calories' => 580, 'protein_g' => 18, 'fat_g' => 22, 'carbs_g' => 78,  'serving_unit' => '份'],
+                    ['name' => '蘿蔔糕',                'calories' => 220, 'protein_g' => 4,  'fat_g' => 8,  'carbs_g' => 35,  'serving_unit' => '份'],
+                    ['name' => '冰奶茶 中杯',           'calories' => 280, 'protein_g' => 4,  'fat_g' => 8,  'carbs_g' => 48,  'serving_unit' => '杯'],
+                    ['name' => '紅茶 中杯',             'calories' => 140, 'protein_g' => 0,  'fat_g' => 0,  'carbs_g' => 35,  'serving_unit' => '杯'],
+                ],
+            ],
+
+            // ==========================================================
+            // 麥味登（早餐連鎖）
+            // ==========================================================
+            [
+                'name' => '麥味登', 'slug' => 'mwd',
+                'category' => 'fast_food', 'logo_emoji' => '🍳',
+                'description' => '台灣早午餐連鎖，多元中西式餐點。',
+                'default_opening_hours' => '每日 06:00 – 14:00',
+                'osm_match_keywords' => ['麥味登', 'MWD'],
+                'menu' => [
+                    ['name' => '香雞蛋餅',              'calories' => 360, 'protein_g' => 16, 'fat_g' => 16, 'carbs_g' => 38,  'serving_unit' => '個'],
+                    ['name' => '雙倍起司蛋餅',          'calories' => 420, 'protein_g' => 18, 'fat_g' => 22, 'carbs_g' => 38,  'serving_unit' => '個'],
+                    ['name' => '燻雞堡',                'calories' => 480, 'protein_g' => 22, 'fat_g' => 22, 'carbs_g' => 46,  'serving_unit' => '個'],
+                    ['name' => '黑胡椒鐵板麵',          'calories' => 600, 'protein_g' => 20, 'fat_g' => 24, 'carbs_g' => 78,  'serving_unit' => '份'],
+                    ['name' => '蕃茄義大利麵',          'calories' => 540, 'protein_g' => 16, 'fat_g' => 18, 'carbs_g' => 80,  'serving_unit' => '份'],
+                    ['name' => '美式炒蛋早餐',          'calories' => 480, 'protein_g' => 22, 'fat_g' => 26, 'carbs_g' => 38,  'serving_unit' => '份'],
+                    ['name' => '法式吐司',              'calories' => 380, 'protein_g' => 12, 'fat_g' => 16, 'carbs_g' => 48,  'serving_unit' => '份'],
+                    ['name' => '冰紅茶 中杯',           'calories' => 140, 'protein_g' => 0,  'fat_g' => 0,  'carbs_g' => 35,  'serving_unit' => '杯'],
+                    ['name' => '冰奶茶 中杯',           'calories' => 280, 'protein_g' => 4,  'fat_g' => 8,  'carbs_g' => 48,  'serving_unit' => '杯'],
+                ],
+            ],
+
+            // ==========================================================
+            // 繼光香香雞
+            // ==========================================================
+            [
+                'name' => '繼光香香雞', 'slug' => 'jl-fc',
+                'category' => 'fast_food', 'logo_emoji' => '🍗',
+                'description' => '台灣經典香香雞連鎖，雞肉小塊裹粉酥炸。',
+                'default_opening_hours' => '每日 11:00 – 22:00',
+                'osm_match_keywords' => ['繼光香香雞', '香香雞'],
+                'menu' => [
+                    ['name' => '香香雞 小份',           'calories' => 320, 'protein_g' => 22, 'fat_g' => 18, 'carbs_g' => 18,  'serving_unit' => '份'],
+                    ['name' => '香香雞 中份',           'calories' => 480, 'protein_g' => 32, 'fat_g' => 26, 'carbs_g' => 26,  'serving_unit' => '份'],
+                    ['name' => '香香雞 大份',           'calories' => 720, 'protein_g' => 48, 'fat_g' => 38, 'carbs_g' => 40,  'serving_unit' => '份'],
+                    ['name' => '雞排',                  'calories' => 380, 'protein_g' => 26, 'fat_g' => 22, 'carbs_g' => 18,  'serving_unit' => '塊'],
+                    ['name' => '辣雞排',                'calories' => 400, 'protein_g' => 26, 'fat_g' => 23, 'carbs_g' => 20,  'serving_unit' => '塊'],
+                    ['name' => '黃金薯條',              'calories' => 320, 'protein_g' => 4,  'fat_g' => 16, 'carbs_g' => 42,  'serving_unit' => '份'],
+                    ['name' => '甜不辣',                'calories' => 280, 'protein_g' => 12, 'fat_g' => 14, 'carbs_g' => 26,  'serving_unit' => '份'],
+                    ['name' => '雞米花',                'calories' => 350, 'protein_g' => 18, 'fat_g' => 22, 'carbs_g' => 22,  'serving_unit' => '盒'],
+                    ['name' => '香酥地瓜薯條',          'calories' => 360, 'protein_g' => 3,  'fat_g' => 18, 'carbs_g' => 48,  'serving_unit' => '份'],
+                ],
+            ],
+
+            // ==========================================================
+            // 必勝客
+            // ==========================================================
+            [
+                'name' => '必勝客', 'slug' => 'pizza-hut',
+                'category' => 'fast_food', 'logo_emoji' => '🍕',
+                'description' => '美式披薩連鎖，特色為厚片披薩、義大利麵與雞翅。',
+                'default_opening_hours' => '每日 11:00 – 22:00',
+                'osm_match_keywords' => ['必勝客', 'Pizza Hut'],
+                'menu' => [
+                    ['name' => '夏威夷披薩 一片',       'calories' => 230, 'protein_g' => 10, 'fat_g' => 9,  'carbs_g' => 28,  'serving_unit' => '片'],
+                    ['name' => '海鮮披薩 一片',         'calories' => 240, 'protein_g' => 12, 'fat_g' => 9,  'carbs_g' => 28,  'serving_unit' => '片'],
+                    ['name' => '燻雞披薩 一片',         'calories' => 260, 'protein_g' => 13, 'fat_g' => 11, 'carbs_g' => 28,  'serving_unit' => '片'],
+                    ['name' => '總匯披薩 一片',         'calories' => 280, 'protein_g' => 13, 'fat_g' => 13, 'carbs_g' => 28,  'serving_unit' => '片'],
+                    ['name' => '起司披薩 一片',         'calories' => 250, 'protein_g' => 12, 'fat_g' => 11, 'carbs_g' => 28,  'serving_unit' => '片'],
+                    ['name' => '九吋小披薩 整份',       'calories' => 1200,'protein_g' => 50, 'fat_g' => 50, 'carbs_g' => 140, 'serving_unit' => '份'],
+                    ['name' => '雞翅 一隻',             'calories' => 130, 'protein_g' => 9,  'fat_g' => 10, 'carbs_g' => 1,   'serving_unit' => '隻'],
+                    ['name' => '義大利麵 茄汁肉醬',     'calories' => 580, 'protein_g' => 22, 'fat_g' => 22, 'carbs_g' => 75,  'serving_unit' => '份'],
+                    ['name' => '玉米濃湯',              'calories' => 130, 'protein_g' => 3,  'fat_g' => 4,  'carbs_g' => 22,  'serving_unit' => '碗'],
+                    ['name' => '可樂 中杯',             'calories' => 150, 'protein_g' => 0,  'fat_g' => 0,  'carbs_g' => 38,  'serving_unit' => '杯'],
+                ],
+            ],
+
+            // ==========================================================
+            // CoCo 都可（手搖飲）
+            // ==========================================================
+            [
+                'name' => 'CoCo 都可', 'slug' => 'coco',
+                'category' => 'drink', 'logo_emoji' => '🧋',
+                'description' => '台灣手搖飲連鎖，全球門市眾多。標示為大杯 700ml、全糖正常冰。',
+                'menu_confidence' => 'medium',
+                'default_opening_hours' => '每日 10:00 – 22:00',
+                'osm_match_keywords' => ['CoCo', '都可', 'CoCo 都可', 'Coco Tea'],
+                'menu' => [
+                    ['name' => '珍珠奶茶 全糖',          'calories' => 580, 'protein_g' => 6, 'fat_g' => 12, 'carbs_g' => 110, 'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '珍珠奶茶 半糖',          'calories' => 460, 'protein_g' => 6, 'fat_g' => 12, 'carbs_g' => 80,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '阿薩姆奶茶 全糖',        'calories' => 380, 'protein_g' => 5, 'fat_g' => 10, 'carbs_g' => 68,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '波霸鮮奶茶 全糖',        'calories' => 580, 'protein_g' => 9, 'fat_g' => 14, 'carbs_g' => 100, 'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '檸檬綠茶 全糖',          'calories' => 320, 'protein_g' => 0, 'fat_g' => 0,  'carbs_g' => 80,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '百香雙響砲 全糖',        'calories' => 360, 'protein_g' => 1, 'fat_g' => 0,  'carbs_g' => 90,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '奇蹟雙響砲 全糖',        'calories' => 380, 'protein_g' => 1, 'fat_g' => 0,  'carbs_g' => 95,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '茉莉綠茶 無糖',          'calories' => 5,   'protein_g' => 0, 'fat_g' => 0,  'carbs_g' => 1,   'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '冬瓜茶 全糖',            'calories' => 320, 'protein_g' => 0, 'fat_g' => 0,  'carbs_g' => 80,  'serving_unit' => '杯', 'serving_size' => 700],
+                ],
+            ],
+
+            // ==========================================================
+            // 一芳水果茶
+            // ==========================================================
+            [
+                'name' => '一芳水果茶', 'slug' => 'yifang',
+                'category' => 'drink', 'logo_emoji' => '🍵',
+                'description' => '台灣水果茶連鎖，主打天然水果茶。標示為大杯 700ml、全糖正常冰。',
+                'menu_confidence' => 'medium',
+                'default_opening_hours' => '每日 10:00 – 22:00',
+                'osm_match_keywords' => ['一芳', '一芳水果茶', 'Yi Fang'],
+                'menu' => [
+                    ['name' => '招牌水果茶 全糖',        'calories' => 380, 'protein_g' => 1, 'fat_g' => 0, 'carbs_g' => 95,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '招牌水果茶 半糖',        'calories' => 280, 'protein_g' => 1, 'fat_g' => 0, 'carbs_g' => 70,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '芒果綠茶 全糖',          'calories' => 360, 'protein_g' => 1, 'fat_g' => 0, 'carbs_g' => 90,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '日月潭紅茶 全糖',        'calories' => 280, 'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 70,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '冬瓜檸檬 全糖',          'calories' => 320, 'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 80,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '甘蔗青茶 全糖',          'calories' => 300, 'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 75,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '老欉鳳梨茶 全糖',        'calories' => 340, 'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 85,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '花漾紅茶 無糖',          'calories' => 5,   'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 1,   'serving_unit' => '杯', 'serving_size' => 700],
+                ],
+            ],
+
+            // ==========================================================
+            // 大苑子
+            // ==========================================================
+            [
+                'name' => '大苑子', 'slug' => 'dayungs',
+                'category' => 'drink', 'logo_emoji' => '🍊',
+                'description' => '台灣鮮榨水果茶連鎖。標示為大杯 700ml、全糖正常冰。',
+                'menu_confidence' => 'medium',
+                'default_opening_hours' => '每日 10:00 – 22:00',
+                'osm_match_keywords' => ['大苑子', "Dayung's", 'Dayungs'],
+                'menu' => [
+                    ['name' => '檸檬大苑 全糖',          'calories' => 340, 'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 85,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '芒果柳橙 全糖',          'calories' => 360, 'protein_g' => 1, 'fat_g' => 0, 'carbs_g' => 90,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '葡萄柚綠茶 全糖',        'calories' => 320, 'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 80,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '鳳梨百香 全糖',          'calories' => 350, 'protein_g' => 1, 'fat_g' => 0, 'carbs_g' => 88,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '草莓鮮奶 全糖',          'calories' => 420, 'protein_g' => 8, 'fat_g' => 11,'carbs_g' => 75,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '蘋果茶 全糖',            'calories' => 300, 'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 75,  'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '純茶 無糖',              'calories' => 5,   'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 1,   'serving_unit' => '杯', 'serving_size' => 700],
+                    ['name' => '原味檸檬綠茶 半糖',      'calories' => 220, 'protein_g' => 0, 'fat_g' => 0, 'carbs_g' => 55,  'serving_unit' => '杯', 'serving_size' => 700],
+                ],
+            ],
         ];
     }
 }
