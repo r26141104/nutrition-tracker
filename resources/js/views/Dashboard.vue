@@ -999,5 +999,25 @@ function dietScoreColor(level: string): string {
 /* 餐點列表 */
 .empty-meals { text-align: center; padding: 24px 0; color: #64748b; }
 .empty-meals p { margin: 0 0 12px; }
-.btn-primary-link { display: inline-block; background: #0ea5e9; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 0.9375rem; }
-.btn
+.btn-primary-link:hover { background: #0284c7; }
+
+.meal-bucket { margin-bottom: 16px; }
+.meal-bucket:last-child { margin-bottom: 0; }
+.bucket-title { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 0.9375rem; color: #334155; padding-bottom: 6px; border-bottom: 1px dashed #e2e8f0; }
+.bucket-icon { font-size: 1rem; }
+.bucket-count { margin-left: auto; font-size: 0.75rem; color: #94a3b8; font-weight: 400; }
+.bucket-empty { color: #cbd5e1; padding: 4px 0 8px; font-size: 0.875rem; }
+
+.meal-list { display: flex; flex-direction: column; gap: 8px; }
+.meal-card { background: #f8fafc; border-radius: 8px; padding: 10px 12px; }
+.meal-head { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.meal-totals { color: #0ea5e9; font-weight: 600; font-size: 0.875rem; }
+.meal-totals small { color: #64748b; font-weight: 400; margin-left: 6px; }
+.item-list { list-style: none; margin: 0; padding: 0; }
+.item-list li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 3px 0; font-size: 0.8125rem; color: #475569; }
+.item-name { color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-qty { color: #94a3b8; font-variant-numeric: tabular-nums; }
+.item-cal { color: #0ea5e9; font-variant-numeric: tabular-nums; font-weight: 500; }
+
+.theme-toggle-btn { cursor: pointer; font-family: inherit; }
+</style>
