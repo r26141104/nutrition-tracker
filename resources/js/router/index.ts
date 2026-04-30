@@ -150,6 +150,25 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/trends',
+    name: 'trends',
+    component: () => import('@/views/Trends.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: () => import('@/views/About.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/profile-edit',
+    name: 'profile-edit',
+    component: () => import('@/views/ProfileSetup.vue'),
+    meta: { requiresAuth: true, editMode: true },
+  },
+
+  {
     path: '/:pathMatch(.*)*',
     redirect: { name: 'login' },
   },

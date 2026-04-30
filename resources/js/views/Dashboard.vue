@@ -205,6 +205,23 @@ async function onLogout(): Promise<void> {
   router.push({ name: 'login' });
 }
 
+// 暗色主題切換
+const isDarkMode = ref<boolean>(localStorage.getItem('theme') === 'dark');
+function toggleTheme(): void {
+  isDarkMode.value = !isDarkMode.value;
+  if (isDarkMode.value) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'light');
+  }
+}
+// 進頁面時套用儲存的主題
+if (isDarkMode.value) {
+  document.documentElement.setAttribute('data-theme', 'dark');
+}
+
 // 把 today_meals 按 meal_type 分桶，沒有的桶就是空陣列
 const mealsByType = computed(() => {
   const buckets: Record<MealType, DashboardData['today_meals']> = {
@@ -287,6 +304,10 @@ function dietScoreColor(level: string): string {
         <span class="nav-icon">👤</span>
         <span class="nav-label">個人資料</span>
       </RouterLink>
+      <button type="button" class="nav-pill theme-toggle-btn" @click="toggleTheme" :title="isDarkMode ? '切換亮色' : '切換暗色'">
+        <span class="nav-icon">{{ isDarkMode ? '🌙' : '☀️' }}</span>
+        <span class="nav-label">{{ isDarkMode ? '暗色' : '亮色' }}</span>
+      </button>
       <RouterLink to="/foods" class="nav-pill">
         <span class="nav-icon">🍱</span>
         <span class="nav-label">食物資料庫</span>
@@ -326,6 +347,14 @@ function dietScoreColor(level: string): string {
       <RouterLink to="/browse-meal" class="nav-pill">
         <span class="nav-icon">🍽️</span>
         <span class="nav-label">依餐別瀏覽</span>
+      </RouterLink>
+      <RouterLink to="/trends" class="nav-pill">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">趨勢圖表</span>
+      </RouterLink>
+      <RouterLink to="/about" class="nav-pill">
+        <span class="nav-icon">ℹ️</span>
+        <span class="nav-label">關於</span>
       </RouterLink>
     </nav>
 
@@ -971,22 +1000,4 @@ function dietScoreColor(level: string): string {
 .empty-meals { text-align: center; padding: 24px 0; color: #64748b; }
 .empty-meals p { margin: 0 0 12px; }
 .btn-primary-link { display: inline-block; background: #0ea5e9; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 0.9375rem; }
-.btn-primary-link:hover { background: #0284c7; }
-
-.meal-bucket { margin-bottom: 16px; }
-.meal-bucket:last-child { margin-bottom: 0; }
-.bucket-title { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 0.9375rem; color: #334155; padding-bottom: 6px; border-bottom: 1px dashed #e2e8f0; }
-.bucket-icon { font-size: 1rem; }
-.bucket-count { margin-left: auto; font-size: 0.75rem; color: #94a3b8; font-weight: 400; }
-.bucket-empty { color: #cbd5e1; padding: 4px 0 8px; font-size: 0.875rem; }
-
-.meal-list { display: flex; flex-direction: column; gap: 8px; }
-.meal-card { background: #f8fafc; border-radius: 8px; padding: 10px 12px; }
-.meal-head { display: flex; justify-content: flex-end; margin-bottom: 6px; }
-.meal-totals { color: #0ea5e9; font-weight: 600; font-size: 0.875rem; }
-.meal-totals small { color: #64748b; font-weight: 400; margin-left: 6px; }
-.item-list { list-style: none; margin: 0; padding: 0; }
-.item-name { color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.item-qty { color: #94a3b8; font-variant-numeric: tabular-nums; }
-.item-cal { color: #0ea5e9; font-variant-numeric: tabular-nums; font-weight: 500; }
-</style>
+.btn
