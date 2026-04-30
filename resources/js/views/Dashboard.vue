@@ -309,6 +309,10 @@ function dietScoreColor(level: string): string {
         <span class="nav-icon">💪</span>
         <span class="nav-label">運動建議</span>
       </RouterLink>
+      <RouterLink to="/exercise-burn" class="nav-pill">
+        <span class="nav-icon">🔥</span>
+        <span class="nav-label">熱量消耗</span>
+      </RouterLink>
       <RouterLink to="/food-recommendations" class="nav-pill">
         <span class="nav-icon">🥗</span>
         <span class="nav-label">餐點建議</span>

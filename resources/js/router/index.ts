@@ -150,6 +150,12 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/exercise-burn',
+    name: 'exercise-burn',
+    component: () => import('@/views/ExerciseBurn.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/trends',
     name: 'trends',
     component: () => import('@/views/Trends.vue'),
