@@ -986,5 +986,7 @@ function dietScoreColor(level: string): string {
 .meal-totals { color: #0ea5e9; font-weight: 600; font-size: 0.875rem; }
 .meal-totals small { color: #64748b; font-weight: 400; margin-left: 6px; }
 .item-list { list-style: none; margin: 0; padding: 0; }
-.item-list li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 3px 0; font-size: 0.8125rem; color: #475569; }
-.item-name { co
+.item-name { color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-qty { color: #94a3b8; font-variant-numeric: tabular-nums; }
+.item-cal { color: #0ea5e9; font-variant-numeric: tabular-nums; font-weight: 500; }
+</style>
