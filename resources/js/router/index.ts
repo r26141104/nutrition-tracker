@@ -169,3 +169,11 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return { name: 'login' };
+  }
+  if (to.meta.guestOnly && auth.isAuthenticated) {
+    return { name: 'dashboard' };
+  }
+});
+
+export default router;
