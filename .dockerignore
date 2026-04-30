@@ -1,0 +1,56 @@
+# 階段 J：Docker build 排除清單
+# 這些不會被打包進 Docker image，加快 build 速度
+
+.git
+.github
+.idea
+.vscode
+.cursor
+.codex
+.zed
+.nova
+
+# 套件（會在 Docker 內重新 install）
+node_modules
+vendor
+
+# 環境設定（敏感資料，要透過 Render env vars 注入）
+.env
+.env.backup
+.env.production
+*.log
+
+# 開發 / 測試用本機檔案
+/database/database.sqlite
+/database/database.sqlite-journal
+/database/*.sqlite
+
+# Laravel 暫存檔
+/storage/logs/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/pail
+/public/build
+/public/hot
+/public/storage
+
+# 文件 + 範例
+*.md
+!README.md
+sample-foods.csv
+sample-foods.json
+
+# Composer / NPM 暫存
+.phpunit.result.cache
+.phpactor.json
+auth.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE helper
+_ide_helper.php
+Homestead.json
+Homestead.yaml
