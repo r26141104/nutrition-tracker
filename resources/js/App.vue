@@ -233,4 +233,4 @@ a.btn-primary:hover, a.btn-secondary:hover {
 [data-theme="dark"] .el-card { background: rgba(30, 41, 59, 0.85) !important; color: #e2e8f0; }
 [data-theme="dark"] .el-progress__text { color: #e2e8f0 !important; }
 [data-theme="dark"] button:disabled { color: #64748b; }
-</style
+</style>
