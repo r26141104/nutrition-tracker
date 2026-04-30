@@ -1,20 +1,12 @@
-# 階段 J：Render 部署用 Dockerfile
+# 階段 J：Render 部署用 Dockerfile（v2 - Apache）
 #
-# 為什麼用 Dockerfile？
-#   Render 原生 runtime 不支援 PHP（只支援 Node/Python/Ruby/Go），
-#   所以 Laravel 專案要部署到 Render 必須用 Docker。
-#
-# 這個 Dockerfile 做什麼：
-#   1. 用官方 PHP 8.3 CLI 映像當基底
-#   2. 安裝 Laravel + PostgreSQL 需要的系統套件
-#   3. 安裝 Node 20 來 build 前端
-#   4. 跑 composer install + npm build + 各種 Laravel cache
-#   5. 啟動時自動跑 migration 然後啟動 PHP 內建伺服器
-#
-# 注意：使用 PHP 內建 server（php -S）對 demo 夠用，
-# 上線等級流量需要 nginx + php-fpm，但學期報告不需要。
+# 改用 php:apache 而不是 php:cli，因為：
+#   1. Apache 處理靜態檔案 + URL rewrite 比 php -S 穩定太多
+#   2. 直接服務 Vue build 的 JS / CSS / 圖片
+#   3. mod_rewrite 自動處理 Laravel 路由
+#   4. 不需要自寫 router.php，Apache 直接處理
 
-FROM php:8.3-cli
+FROM php:8.3-apache
 
 # 安裝系統依賴
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -37,37 +29,40 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 安裝 Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Apache 設定：把 DocumentRoot 從 /var/www/html 改成 /var/www/html/public
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# 啟用 mod_rewrite 讓 Laravel 的 .htaccess 生效
+RUN a2enmod rewrite headers
+
 WORKDIR /var/www/html
 
-# 先複製依賴清單，分層 cache（之後改 code 不重抓套件）
+# 先複製 composer 依賴（可被 cache）
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
+# 再複製 npm 依賴
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# 複製剩下的檔案
+# 複製剩下的程式碼
 COPY . .
 
-# 完成 composer + npm build
+# 完成 build：composer dump-autoload + 前端 production build
 RUN composer dump-autoload --optimize \
     && npm run build \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 
-# Render 會把 PORT 環境變數塞進來（通常 10000）
-ENV PORT=10000
-EXPOSE 10000
+# Render 透過 PORT 環境變數決定要監聽哪個 port
+# Apache 預設聽 80，要改成 $PORT
+ENV PORT=80
+EXPOSE 80
 
-# 啟動指令：
-#   1. cache config / route / view（提速）
-#   2. 跑 migration（idempotent，已跑過會跳過）
-#   3. 跑 FoodSeeder + ChainStoreSeeder（用 firstOrCreate，重跑不會重複建立）
-#   4. 啟動 PHP 內建 server
-# 因為 Render Free 方案沒 SSH，用這個方式確保部署後資料庫一定有 seed 資料
-CMD php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache \
-    && php artisan migrate --force \
-    && php artisan db:seed --force --class=FoodSeeder \
-    && php artisan db:seed --force --class=ChainStoreSeeder \
-    && php -S 0.0.0.0:${PORT} -t public public/router.php
+# 啟動 script：替換 Apache 設定的 port、跑 migration、啟動 Apache
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
