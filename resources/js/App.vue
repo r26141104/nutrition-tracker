@@ -9,7 +9,7 @@ import { RouterView } from 'vue-router';
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700&display=swap');
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -20,53 +20,117 @@ body {
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
   min-height: 100vh;
-  background-color: #fafbff;
+  background-color: #f5f7fb;
 }
 
+/* 專業 SaaS 背景：頂部強烈品牌色 band + 對角線細紋 + 多層 radial 光暈 */
 .app-bg {
   min-height: 100vh;
   position: relative;
   background:
-    radial-gradient(ellipse 800px 600px at 10% 0%, rgba(99, 102, 241, 0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 700px 500px at 95% 25%, rgba(168, 85, 247, 0.08) 0%, transparent 55%),
-    radial-gradient(ellipse 600px 600px at 50% 100%, rgba(56, 189, 248, 0.06) 0%, transparent 60%),
-    radial-gradient(circle at 1px 1px, rgba(99, 102, 241, 0.10) 1px, transparent 0);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
+    /* 頂部強烈品牌色 band（紫到透明） */
+    linear-gradient(180deg, rgba(67, 56, 202, 0.07) 0%, transparent 280px),
+    /* 大塊光暈 */
+    radial-gradient(ellipse 1200px 500px at 0% 0%, rgba(99, 102, 241, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse 900px 500px at 100% 0%, rgba(168, 85, 247, 0.14) 0%, transparent 50%),
+    radial-gradient(ellipse 700px 400px at 50% 100%, rgba(56, 189, 248, 0.07) 0%, transparent 60%),
+    /* 對角細紋網格（45 度線條，更精緻） */
+    repeating-linear-gradient(45deg,
+      transparent 0px,
+      transparent 38px,
+      rgba(99, 102, 241, 0.025) 38px,
+      rgba(99, 102, 241, 0.025) 39px
+    ),
+    repeating-linear-gradient(-45deg,
+      transparent 0px,
+      transparent 38px,
+      rgba(99, 102, 241, 0.025) 38px,
+      rgba(99, 102, 241, 0.025) 39px
+    );
   background-attachment: fixed;
 }
 
+/* 頂部 1px 品牌色高光線 */
 .app-bg::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), transparent);
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(99, 102, 241, 0.6) 30%,
+    rgba(168, 85, 247, 0.6) 70%,
+    transparent 100%
+  );
   z-index: 1000;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
 }
 
 .app-bg > * { position: relative; z-index: 1; }
 
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+/* === 滾動條 === */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: rgba(241, 245, 249, 0.3); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #818cf8, #6366f1);
+  border-radius: 12px;
+  border: 3px solid rgba(241, 245, 249, 0.3);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6366f1, #4f46e5);
+  background-clip: padding-box;
+  border: 3px solid rgba(241, 245, 249, 0.3);
+}
 
-::selection { background: rgba(79, 70, 229, 0.18); color: #1e293b; }
+/* === 選取 / 焦點 === */
+::selection { background: rgba(79, 70, 229, 0.2); color: #1e293b; }
 :focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; border-radius: 4px; }
 
+/* === 標題字級提升（letter-spacing + weight） === */
+h1, h2, h3, h4, h5, h6 { letter-spacing: -0.025em; font-weight: 700; }
+
+/* === 卡片：更銳利的多層陰影 + 頂部 accent 漸層線 === */
 .card {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.06) !important;
-  transition: all 0.2s ease;
+  position: relative;
+  border-radius: 14px !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.04),
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 8px 24px rgba(15, 23, 42, 0.06) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+/* 卡片頂部 1px 漸層線（會在 hover 時更亮） */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(99, 102, 241, 0.3) 50%,
+    transparent 100%
+  );
+  opacity: 0.7;
+  transition: opacity 0.25s;
+  pointer-events: none;
 }
 .card:hover {
-  border-color: #c7d2fe !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(99, 102, 241, 0.08) !important;
-  transform: translateY(-1px);
+  border-color: rgba(165, 180, 252, 0.6) !important;
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.08),
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 16px 40px rgba(99, 102, 241, 0.12) !important;
+  transform: translateY(-2px);
 }
+.card:hover::after { opacity: 1; }
 
+/* === 按鈕互動 === */
 button:not(:disabled), a.btn-primary, a.btn-secondary {
   transition: all 0.18s ease;
 }
@@ -74,74 +138,20 @@ button:not(:disabled):hover, a.btn-primary:hover, a.btn-secondary:hover {
   transform: translateY(-1px);
 }
 
-.el-button { font-family: inherit !important; border-radius: 8px !important; }
+/* === Element Plus === */
+.el-button { font-family: inherit !important; border-radius: 8px !important; font-weight: 500 !important; }
 .el-card {
-  border-radius: 12px !important;
-  border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.04), 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06) !important;
 }
 
+/* === 響應式 === */
 @media (max-width: 480px) {
-  .app-bg { background-size: 100% 100%, 100% 100%, 100% 100%, 20px 20px; }
+  body { letter-spacing: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
-
-[data-theme="dark"] body {
-  background-color: #0a0e1a;
-  color: #e2e8f0;
-}
-
-[data-theme="dark"] .app-bg {
-  background:
-    radial-gradient(ellipse 800px 600px at 10% 0%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 700px 500px at 95% 25%, rgba(168, 85, 247, 0.15) 0%, transparent 55%),
-    radial-gradient(ellipse 600px 600px at 50% 100%, rgba(34, 211, 238, 0.10) 0%, transparent 60%),
-    radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.08) 1px, transparent 0);
-}
-
-[data-theme="dark"] .card {
-  background: #111827 !important;
-  border-color: #1f2937 !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
-}
-[data-theme="dark"] .card:hover {
-  border-color: #4338ca !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(99, 102, 241, 0.25) !important;
-}
-
-[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4 { color: #f1f5f9; }
-[data-theme="dark"] p, [data-theme="dark"] span, [data-theme="dark"] li, [data-theme="dark"] label { color: #cbd5e1; }
-[data-theme="dark"] small { color: #94a3b8; }
-
-[data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea {
-  background: #0a0e1a !important;
-  border-color: #1f2937 !important;
-  color: #f1f5f9 !important;
-}
-[data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: #64748b; }
-
-[data-theme="dark"] .nav-pill {
-  background: #111827 !important;
-  border-color: #1f2937 !important;
-  color: #cbd5e1 !important;
-}
-[data-theme="dark"] .nav-pill:hover {
-  background: #1f2937 !important;
-  border-color: #4338ca !important;
-  color: #c7d2fe !important;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #334155; }
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-[data-theme="dark"] .el-card {
-  background: #111827 !important;
-  border-color: #1f2937 !important;
-  color: #e2e8f0;
-}
-[data-theme="dark"] .el-progress__text { color: #e2e8f0 !important; }
-[data-theme="dark"] button:disabled { color: #64748b; }
 </style>

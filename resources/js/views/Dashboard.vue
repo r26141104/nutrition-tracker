@@ -205,22 +205,7 @@ async function onLogout(): Promise<void> {
   router.push({ name: 'login' });
 }
 
-// 暗色主題切換
-const isDarkMode = ref<boolean>(localStorage.getItem('theme') === 'dark');
-function toggleTheme(): void {
-  isDarkMode.value = !isDarkMode.value;
-  if (isDarkMode.value) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('theme', 'dark');
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('theme', 'light');
-  }
-}
-// 進頁面時套用儲存的主題
-if (isDarkMode.value) {
-  document.documentElement.setAttribute('data-theme', 'dark');
-}
+
 
 // 把 today_meals 按 meal_type 分桶，沒有的桶就是空陣列
 const mealsByType = computed(() => {
@@ -304,10 +289,6 @@ function dietScoreColor(level: string): string {
         <span class="nav-icon">👤</span>
         <span class="nav-label">個人資料</span>
       </RouterLink>
-      <button type="button" class="nav-pill theme-toggle-btn" @click="toggleTheme" :title="isDarkMode ? '切換亮色' : '切換暗色'">
-        <span class="nav-icon">{{ isDarkMode ? '🌙' : '☀️' }}</span>
-        <span class="nav-label">{{ isDarkMode ? '暗色' : '亮色' }}</span>
-      </button>
       <RouterLink to="/foods" class="nav-pill">
         <span class="nav-icon">🍱</span>
         <span class="nav-label">食物資料庫</span>
