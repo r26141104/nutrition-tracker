@@ -584,3 +584,28 @@ function retryLocation(): void {
   background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd;
   padding: 7px 12px; border-radius: 8px;
   font-size: 0.8125rem; cursor: pointer;
+  text-decoration: none; font-weight: 500;
+  white-space: nowrap;
+}
+.btn-ai:hover:not(:disabled) { background: #ddd6fe; }
+.btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.error-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fef2f2; border: 1px solid #fecaca;
+  color: #b91c1c; padding: 12px 16px; border-radius: 8px;
+  margin: 12px 0; font-size: 0.875rem;
+}
+.error-close {
+  background: transparent; border: 0; color: #b91c1c;
+  cursor: pointer; padding: 0 8px; font-size: 1rem;
+}
+.error-close:hover { color: #7f1d1d; }
+
+.empty {
+  padding: 40px 24px; text-align: center;
+  color: #94a3b8; font-size: 0.9375rem;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+}
+</style>
