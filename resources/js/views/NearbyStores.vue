@@ -9,6 +9,7 @@ import {
   type NearbyStore,
 } from '@/services/nearbyStoreService';
 import { geocodingService } from '@/services/geocodingService';
+import { ElMessageBox } from 'element-plus';
 
 // Leaflet 從 CDN 動態載入（避免 npm install 額外步驟）
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,10 +139,30 @@ async function onSearchAddress(): Promise<void> {
  */
 async function onGenerateMenu(s: NearbyStore): Promise<void> {
   if (generatingForOsmId.value !== null) return; // 防止連點
+
+  // 1) 先讓使用者補充提示，AI 才不會瞎猜
+  let hint = '';
+  try {
+    const result = await ElMessageBox.prompt(
+      `店家「${s.name}」主要賣什麼？\n\n例如：健康餐 / 便當 / 咖啡輕食 / 早午餐 / 滷味 / 排骨飯\n\n（不知道也可以留空，但 AI 可能會猜錯類型）`,
+      '幫 AI 一個忙',
+      {
+        confirmButtonText: '開始推測',
+        cancelButtonText: '取消',
+        inputPlaceholder: '例：健康餐、便當、咖啡',
+        inputValidator: (v) => (v === null || v.length <= 200) || '提示最多 200 字',
+      },
+    );
+    hint = (result.value || '').trim();
+  } catch {
+    // 使用者按取消
+    return;
+  }
+
   generatingForOsmId.value = s.osm_id;
   errorMsg.value = '';
   try {
-    const meta = await storeService.generateMenu(s.name);
+    const meta = await storeService.generateMenu(s.name, hint || undefined);
     // 跳到既有的菜單頁面
     await router.push({ name: 'store-detail', params: { id: meta.store_id } });
   } catch (e) {
@@ -582,7 +603,6 @@ function retryLocation(): void {
 
 .btn-ai {
   background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd;
-  padding: 7px 12px; border-radius: 8px;
   font-size: 0.8125rem; cursor: pointer;
   text-decoration: none; font-weight: 500;
   white-space: nowrap;

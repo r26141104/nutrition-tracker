@@ -92,6 +92,8 @@ export interface FoodPayload {
   protein_g: number;
   fat_g: number;
   carbs_g: number;
+  /** 連到哪一家店家。null = 不屬於任何店 */
+  store_id?: number | null;
 }
 
 /**

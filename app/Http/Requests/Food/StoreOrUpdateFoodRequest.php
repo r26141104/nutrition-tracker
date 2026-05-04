@@ -37,6 +37,8 @@ class StoreOrUpdateFoodRequest extends FormRequest
             'protein_g'    => ['required', 'numeric', 'min:0', 'max:9999'],
             'fat_g'        => ['required', 'numeric', 'min:0', 'max:9999'],
             'carbs_g'      => ['required', 'numeric', 'min:0', 'max:9999'],
+            // 連到哪一家店家（連鎖店或 AI 推測店）。null = 不屬於任何店
+            'store_id'     => ['nullable', 'integer', 'exists:stores,id'],
         ];
     }
 

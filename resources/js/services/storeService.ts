@@ -50,11 +50,19 @@ export const storeService = {
 
   /**
    * POST /api/stores/generate-menu — 用 AI 為任何店名生成推測菜單
-   * 重複呼叫同名店家會直接回 cache，不會重新跑 AI
+   *
+   * @param name  店家名稱
+   * @param hint  使用者額外提示（賣什麼），可大幅提升 AI 準度
+   *              例：「健康餐」、「便當店」、「咖啡廳」、「賣排骨飯和雞腿飯」
+   * 重複呼叫同名店家 + 同提示會直接回 cache，不會重新跑 AI
    */
-  generateMenu(name: string): Promise<GeneratedMenuMeta> {
+  generateMenu(name: string, hint?: string): Promise<GeneratedMenuMeta> {
+    const payload: { name: string; hint?: string } = { name };
+    if (hint && hint.trim() !== '') {
+      payload.hint = hint.trim();
+    }
     return http
-      .post<GenWrap>('/stores/generate-menu', { name })
+      .post<GenWrap>('/stores/generate-menu', payload)
       .then((r) => r.data.data);
   },
 };

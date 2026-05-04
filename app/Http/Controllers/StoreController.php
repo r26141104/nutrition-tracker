@@ -60,7 +60,11 @@ class StoreController extends Controller
         StoreMenuGenerationService $service,
     ): JsonResponse {
         try {
-            $store = $service->generateForStoreName($request->validated()['name']);
+            $validated = $request->validated();
+            $store = $service->generateForStoreName(
+                $validated['name'],
+                $validated['hint'] ?? null,
+            );
         } catch (RuntimeException $e) {
             return response()->json([
                 'message' => $e->getMessage(),

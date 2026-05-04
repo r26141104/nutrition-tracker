@@ -38,9 +38,12 @@ class StoreMenuGenerationService
     ];
 
     /**
-     * 主入口：給定店名，生成 Store（含菜單）
+     * 主入口：給定店名（可選提示），生成 Store（含菜單）
+     *
+     * @param  string       $storeName  店家名稱
+     * @param  string|null  $hint       使用者提示，例：「賣健康餐」、「便當店」、「咖啡輕食」
      */
-    public function generateForStoreName(string $storeName): Store
+    public function generateForStoreName(string $storeName, ?string $hint = null): Store
     {
         $storeName = trim($storeName);
         if ($storeName === '') {
@@ -50,8 +53,13 @@ class StoreMenuGenerationService
             throw new RuntimeException('店家名稱過長。');
         }
 
-        // slug：用 md5 前 12 碼做唯一識別（不含中文，避免 URL/DB 麻煩）
-        $slug = 'guess-' . substr(md5($storeName), 0, 12);
+        $hint = $hint !== null ? trim($hint) : '';
+        if ($hint !== '' && mb_strlen($hint) > 200) {
+            $hint = mb_substr($hint, 0, 200);
+        }
+
+        // slug：用 md5 前 12 碼做唯一識別（含 hint 確保不同提示產出獨立菜單）
+        $slug = 'guess-' . substr(md5($storeName . '|' . $hint), 0, 12);
 
         // 已存在且有菜單 → 直接回（避免重複燒 AI 配額）
         $existing = Store::where('slug', $slug)->first();
@@ -71,7 +79,7 @@ class StoreMenuGenerationService
         // 確保使用者一定拿到結果
         $parsed = null;
         try {
-            $rawText = $this->callGeminiWithFallback($apiKey, $this->buildPrompt($storeName), useSearch: true);
+            $rawText = $this->callGeminiWithFallback($apiKey, $this->buildPrompt($storeName, $hint), useSearch: true);
             $jsonText = $this->extractJson($rawText);
             $parsed = json_decode($jsonText, true);
         } catch (\Throwable $e) {
@@ -83,7 +91,7 @@ class StoreMenuGenerationService
 
         if (! is_array($parsed) || empty($parsed['items'])) {
             // Fallback：不用 search、用結構化 JSON 模式
-            $rawText = $this->callGeminiWithFallback($apiKey, $this->buildFallbackPrompt($storeName), useSearch: false);
+            $rawText = $this->callGeminiWithFallback($apiKey, $this->buildFallbackPrompt($storeName, $hint), useSearch: false);
             $jsonText = $this->extractJson($rawText);
             $parsed = json_decode($jsonText, true);
             if (json_last_error() !== JSON_ERROR_NONE || ! is_array($parsed)) {
@@ -169,12 +177,18 @@ class StoreMenuGenerationService
     // 內部
     // =================================================================
 
-    private function buildPrompt(string $storeName): string
+    private function buildPrompt(string $storeName, string $hint = ''): string
     {
         $categoryList = implode(' / ', self::ALLOWED_CATEGORIES);
+        $hintBlock = $hint !== '' ? "使用者提供的關鍵線索（務必嚴格遵守）：{$hint}" : '使用者沒有提供額外線索，請完全依賴搜尋結果判斷類型。';
+        $hintRule  = $hint !== ''
+            ? "★★★ 最重要：使用者已經告訴你這家店的類型是「{$hint}」，**不要違背**這個線索。\n   即使搜尋結果矛盾，也要以使用者提示為主，列出符合「{$hint}」的品項。\n   舉例：使用者說「健康餐」就只能列健身餐、沙拉、雞胸肉等；說「咖啡」就只能列咖啡飲品 + 輕食，不能跑出滷肉飯。"
+            : '';
 
         return <<<PROMPT
 你是台灣餐飲分析助手，可以使用 Google 搜尋。
+
+{$hintBlock}
 
 我會給你一個**台灣店家名稱**。你的任務分兩步：
 
@@ -182,7 +196,9 @@ class StoreMenuGenerationService
 搜尋詞建議：「{$storeName} 菜單」、「{$storeName} 價目表」、「{$storeName} 評論」、「{$storeName} 招牌」
 從搜尋結果（Google Maps 評論、部落格、店家粉絲頁、外送平台）找出**這家店實際在賣什麼**。
 
-【步驟 2】根據搜尋結果，列出 15-20 個**這家店真實會賣的品項**並估算營養成分。
+【步驟 2】根據搜尋結果 + 使用者線索，列出 15-20 個**這家店真實會賣的品項**並估算營養成分。
+
+{$hintRule}
 
 店家名稱：{$storeName}
 
@@ -283,12 +299,17 @@ PROMPT;
      * Fallback prompt：不用 search、純粹靠店名類型推測。
      * 比 search 版本快很多（5-10 秒），適合搜尋失敗時的備援。
      */
-    private function buildFallbackPrompt(string $storeName): string
+    private function buildFallbackPrompt(string $storeName, string $hint = ''): string
     {
         $categoryList = implode(' / ', self::ALLOWED_CATEGORIES);
+        $hintBlock = $hint !== ''
+            ? "★★★ 使用者已經告訴你這家店是「{$hint}」，**直接用這個類型**，不要再依店名亂猜。"
+            : '';
 
         return <<<PROMPT
 你是台灣餐飲分析助手。給你一個台灣店家名稱，請根據店名判斷類型並列出該類型常見品項。
+
+{$hintBlock}
 
 店家名稱：{$storeName}
 

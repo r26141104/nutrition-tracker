@@ -109,12 +109,25 @@ class FoodService
     }
 
     /**
-     * 權限檢查：系統食物不可改、自訂食物只有 owner 可改。
+     * 權限檢查：
+     *   1) 連鎖店原始菜單（is_system + 連到非 guess- store）→ 不可改
+     *   2) AI 推測菜單（store 的 slug 以 'guess-' 開頭）→ 任何登入使用者可編輯/刪除
+     *      理由：使用者反映 AI 常推錯店家類型，需要可以清掉錯的、補上對的
+     *   3) 自訂食物 → 只有 owner 可改
      *
      * @throws AuthorizationException
      */
     public function ensureCanModify(Food $food, User $user): void
     {
+        // AI 推測 store 的菜單 → 開放編輯
+        if ($food->store_id) {
+            $food->loadMissing('store');
+            $store = $food->store;
+            if ($store && str_starts_with((string) $store->slug, 'guess-')) {
+                return;
+            }
+        }
+
         if ($food->is_system) {
             throw new AuthorizationException('系統食物不可修改或刪除');
         }
