@@ -280,12 +280,21 @@ class NearbyStoresService
 
     /**
      * 把一個 OSM 店名比對到我們的 Store 連鎖店資料。
+     *
+     * 注意：跳過 AI 推測的 store（slug 以 'guess-' 開頭）——
+     * 那些是之前使用者按「推測菜單」生成的低可信度資料，
+     * 不應該蓋掉「重新推測」按鈕，否則使用者就沒辦法用新提示重跑。
      */
     private function matchToStore(string $osmName, $allStores): ?Store
     {
         $osmLower = mb_strtolower($osmName);
 
         foreach ($allStores as $store) {
+            // 跳過 AI 推測 store
+            if (str_starts_with((string) $store->slug, 'guess-')) {
+                continue;
+            }
+
             $keywords = $store->osm_match_keywords ?? [];
             if (! is_array($keywords)) continue;
             // 把 store name 自己也加進去，雙保險
