@@ -10,6 +10,7 @@ import {
   type MealType,
   type DailySummary,
 } from '@/services/mealService';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const router = useRouter();
 
@@ -95,16 +96,22 @@ function goEdit(meal: Meal): void {
 }
 
 async function onDelete(meal: Meal): Promise<void> {
-  const ok = window.confirm(
-    `確定要刪除這筆 ${MEAL_TYPE_LABEL[meal.meal_type]}（${formatTime(meal.eaten_at)}）嗎？`,
-  );
-  if (!ok) return;
+  try {
+    await ElMessageBox.confirm(
+      `確定要刪除這筆 ${MEAL_TYPE_LABEL[meal.meal_type]}（${formatTime(meal.eaten_at)}）嗎？`,
+      '刪除飲食紀錄',
+      { confirmButtonText: '刪除', cancelButtonText: '取消', type: 'warning' },
+    );
+  } catch {
+    return; // 使用者取消
+  }
 
   try {
     await mealService.delete(meal.id);
+    ElMessage.success('已刪除');
     await fetchAll();
   } catch {
-    window.alert('刪除失敗，請稍後再試');
+    ElMessage.error('刪除失敗，請稍後再試');
   }
 }
 

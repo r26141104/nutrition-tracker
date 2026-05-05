@@ -128,6 +128,19 @@ async function onSubmit(): Promise<void> {
     return;
   }
 
+  // 編輯模式 → 跳二次確認，避免誤覆蓋既有紀錄
+  if (editingId.value !== null) {
+    try {
+      await ElMessageBox.confirm(
+        `確定要把 ${form.record_date} 的體重紀錄更新為 ${form.weight_kg} kg 嗎？`,
+        '更新體重紀錄',
+        { confirmButtonText: '更新', cancelButtonText: '取消', type: 'info' },
+      );
+    } catch {
+      return; // 使用者取消
+    }
+  }
+
   submitting.value = true;
 
   const payload: BodyRecordPayload = {
@@ -743,7 +756,7 @@ function handleError(e: unknown): void {
 .advanced-toggle { margin: 12px 0 8px; padding: 8px 12px; background: #f8fafc; border-radius: 8px; border-left: 3px solid #0ea5e9; }
 .advanced-hint { margin: 4px 0 0; font-size: 0.75rem; color: #64748b; line-height: 1.5; }
 .advanced-fields { background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
-.advanced-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 16px; }
+.advanced-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px  16px; }
 @media (max-width: 600px) { .advanced-grid { grid-template-columns: 1fr; } }
 .advanced-grid :deep(.el-form-item) { margin-bottom: 8px; display: flex; align-items: center; }
 .advanced-grid :deep(.el-form-item__content) { display: flex; align-items: center; gap: 4px; }

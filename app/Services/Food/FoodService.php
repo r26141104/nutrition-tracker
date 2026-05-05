@@ -6,6 +6,8 @@ use App\Models\Food;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class FoodService
@@ -101,10 +103,24 @@ class FoodService
 
     /**
      * 刪除；只有自訂食物的 owner 可以刪。
+     *
+     * 安全檢查：若該食物已被使用者的飲食紀錄引用，則拒絕刪除（保護歷史資料）。
      */
     public function delete(Food $food, User $user): void
     {
         $this->ensureCanModify($food, $user);
+
+        $referencedCount = DB::table('meal_items')
+            ->where('food_id', $food->id)
+            ->count();
+
+        if ($referencedCount > 0) {
+            throw new RuntimeException(
+                "這個食物已被 {$referencedCount} 筆飲食紀錄引用，無法刪除。" .
+                "請先到「飲食紀錄」刪除相關條目，或保留此食物即可。",
+            );
+        }
+
         $food->delete();
     }
 

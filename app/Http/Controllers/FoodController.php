@@ -75,7 +75,12 @@ class FoodController extends Controller
     public function destroy(Request $request, int $food): JsonResponse
     {
         $foodModel = $this->foodService->findVisibleOrFail($food, $request->user()->id);
-        $this->foodService->delete($foodModel, $request->user());
+        try {
+            $this->foodService->delete($foodModel, $request->user());
+        } catch (\RuntimeException $e) {
+            // 例如：被飲食紀錄引用，回 409 Conflict
+            return response()->json(['message' => $e->getMessage()], 409);
+        }
 
         return response()->json(['message' => '已刪除']);
     }

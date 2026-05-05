@@ -13,6 +13,7 @@ import {
   type FoodSourceType,
   type FoodConfidenceLevel,
 } from '@/services/foodService';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const router = useRouter();
 
@@ -114,19 +115,32 @@ function confidenceBadgeClass(c: FoodConfidenceLevel): string {
 }
 
 async function onDelete(food: Food): Promise<void> {
-  const ok = window.confirm(`確定要刪除「${food.name}」嗎？此動作無法復原。`);
-  if (!ok) return;
+  try {
+    await ElMessageBox.confirm(
+      `確定要刪除「${food.name}」嗎？此動作無法復原。`,
+      '刪除食物',
+      { confirmButtonText: '刪除', cancelButtonText: '取消', type: 'warning' },
+    );
+  } catch {
+    return; // 使用者取消
+  }
 
   try {
     await foodService.delete(food.id);
+    ElMessage.success('已刪除');
     // 刪掉後重新抓當前頁；若當前頁刪到變空頁，往前一頁
     if (foods.value.length === 1 && currentPage.value > 1) {
       currentPage.value -= 1;
     } else {
       await fetchFoods();
     }
-  } catch {
-    window.alert('刪除失敗，請稍後再試');
+  } catch (e) {
+    // 後端 409：被飲食紀錄引用，無法刪除
+    const msg = e && typeof e === 'object' && 'response' in e
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? ((e as any).response?.data?.message ?? '刪除失敗，請稍後再試')
+      : '刪除失敗，請稍後再試';
+    ElMessage.error(msg);
   }
 }
 </script>

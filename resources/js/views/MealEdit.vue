@@ -11,6 +11,7 @@ import {
 } from '@/services/mealService';
 import { foodService, type Food } from '@/services/foodService';
 import { nutritionEstimateService } from '@/services/nutritionEstimateService';
+import { ElMessage } from 'element-plus';
 
 const route = useRoute();
 const router = useRouter();
@@ -59,6 +60,10 @@ const searchInput = ref('');
 const searchResults = ref<Food[]>([]);
 const searching = ref(false);
 const showResults = ref(false);
+// 搜尋分頁狀態
+const searchPage = ref<number>(1);
+const searchHasMore = ref<boolean>(false);
+const SEARCH_PER_PAGE = 15;
 
 // 下方「準備加入」的食物 + 份量
 const pickedFood = ref<Food | null>(null);
@@ -81,20 +86,33 @@ watch(searchInput, () => {
   searchTimer = setTimeout(doSearch, 300);
 });
 
-async function doSearch(): Promise<void> {
+async function doSearch(append = false): Promise<void> {
   searching.value = true;
   try {
+    const targetPage = append ? searchPage.value + 1 : 1;
     const res = await foodService.list({
       search: searchInput.value.trim(),
-      per_page: 8,
+      page: targetPage,
+      per_page: SEARCH_PER_PAGE,
     });
-    searchResults.value = res.data;
+    if (append) {
+      searchResults.value = [...searchResults.value, ...res.data];
+    } else {
+      searchResults.value = res.data;
+    }
+    searchPage.value = targetPage;
+    searchHasMore.value = res.meta.last_page > targetPage;
     showResults.value = true;
   } catch {
-    searchResults.value = [];
+    if (!append) searchResults.value = [];
   } finally {
     searching.value = false;
   }
+}
+
+async function loadMoreSearch(): Promise<void> {
+  if (searching.value || !searchHasMore.value) return;
+  await doSearch(true);
 }
 
 function pickFood(food: Food): void {
@@ -155,7 +173,7 @@ function cancelPick(): void {
 function addPickedItem(): void {
   if (!pickedFood.value) return;
   if (!pickedQty.value || pickedQty.value <= 0) {
-    window.alert('份量必須大於 0');
+    ElMessage.warning('份量必須大於 0');
     return;
   }
 
@@ -285,6 +303,13 @@ onMounted(async () => {
 async function onSubmit(): Promise<void> {
   errors.value = {};
   generalError.value = '';
+
+  // 新增時若沒加任何食物 → 阻擋並提示
+  if (!isEditing.value && items.value.filter((i) => i.food_id > 0).length === 0) {
+    ElMessage.warning('請至少加入一項食物');
+    generalError.value = '請至少加入一項食物';
+    return;
+  }
 
   // 把 datetime-local 轉成後端可接受的格式 'YYYY-MM-DD HH:mm:ss'
   const eatenAt = localInputToBackend(form.eaten_at_local);
@@ -470,6 +495,13 @@ function localInputToBackend(local: string): string | null {
                   <small v-if="f.brand">· {{ f.brand }}</small>
                   <span class="result-cal">{{ f.calories }} kcal / {{ f.serving_size }} {{ f.serving_unit }}</span>
                 </li>
+                <li
+                  v-if="searchHasMore"
+                  class="load-more"
+                  @click.stop="loadMoreSearch"
+                >
+                  {{ searching ? '載入中…' : '⌄ 載入更多' }}
+                </li>
               </ul>
               <p v-else-if="searching" class="search-hint">搜尋中…</p>
               <div v-else-if="searchInput && !searching && searchResults.length === 0" class="ai-fallback">
@@ -582,6 +614,14 @@ textarea { resize: vertical; }
 .search-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: white; border: 1px solid #cbd5e1; border-radius: 8px; max-height: 280px; overflow-y: auto; list-style: none; margin: 0; padding: 4px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 10; }
 .search-results li { padding: 8px 12px; cursor: pointer; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
 .search-results li:hover { background: #f0f9ff; }
+.search-results li.load-more {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: #6366f1;
+  font-weight: 500;
+  border-top: 1px solid #e2e8f0;
+}
+.search-results li.load-more:hover { background: #eef2ff; }
 .result-name { font-size: 0.9375rem; color: #0f172a; }
 .result-cal { margin-left: auto; font-size: 0.8125rem; color: #0ea5e9; font-weight: 500; }
 .search-hint { margin: 8px 0 0; font-size: 0.8125rem; color: #64748b; }

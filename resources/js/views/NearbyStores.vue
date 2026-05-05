@@ -33,6 +33,9 @@ const mapInstance = shallowRef<unknown>(null);
 // 半徑選擇
 const radius = ref<number>(1000);
 
+// Leaflet 載入是否失敗（沒網路 / CDN 掛了）
+const leafletFailed = ref<boolean>(false);
+
 // === 地址搜尋狀態 ===
 const addressInput = ref<string>('');
 const geocoding = ref<boolean>(false);
@@ -223,7 +226,11 @@ function loadLeaflet(): Promise<void> {
     const script = document.createElement('script');
     script.src = LEAFLET_JS;
     script.onload = () => resolve();
-    script.onerror = () => resolve(); // 失敗也繼續，改成只顯示列表
+    script.onerror = () => {
+      // 通常是 CDN 阻擋或網路問題；地圖不可用，但列表還是會顯示
+      leafletFailed.value = true;
+      resolve();
+    };
     document.head.appendChild(script);
   });
 }
@@ -374,7 +381,11 @@ function retryLocation(): void {
 
       <!-- 地圖 -->
       <div class="map-wrap">
-        <div ref="mapRef" class="map"></div>
+        <div v-if="leafletFailed" class="map-fallback">
+          🗺️ 地圖載入失敗（可能是網路或 CDN 阻擋）<br>
+          <small>下方店家列表仍可正常使用</small>
+        </div>
+        <div v-else ref="mapRef" class="map"></div>
         <p class="map-legend">
           <span class="dot dot-self"></span>{{ locationMode === 'address' ? '搜尋位置' : '我的位置' }}
           <span class="dot dot-matched"></span>有完整菜單
@@ -532,6 +543,18 @@ function retryLocation(): void {
   margin-bottom: 12px;
 }
 .map { height: 380px; width: 100%; }
+.map-fallback {
+  height: 200px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  border: 1px dashed #fcd34d;
+}
+.map-fallback small { color: #b45309; font-size: 0.8125rem; }
 .map-legend {
   display: flex; gap: 12px; flex-wrap: wrap;
   margin: 8px 0 0; padding: 8px 12px;

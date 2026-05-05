@@ -237,6 +237,14 @@ function progressDisplayValue(percent: number): number {
   return Math.min(100, Math.max(0, percent));
 }
 
+// 進度條顯示文字：未超標 → "75.3%"；超標 → "100% (超 25%)"
+// 視覺上不會跑出讓人困惑的 125.5%
+function progressLabel(percent: number): string {
+  const safe = Math.max(0, percent);
+  if (safe <= 100) return safe.toFixed(1) + '%';
+  return '100% (超 ' + (safe - 100).toFixed(0) + '%)';
+}
+
 // 後端 warning type → el-alert type
 // danger 對應 el-alert 的 'error'，其他直通
 function alertType(t: WarningType): 'info' | 'warning' | 'error' {
@@ -379,10 +387,15 @@ function dietScoreColor(level: string): string {
             <div><dt>目標體重</dt><dd>{{ dashboard.nutrition_target.target_weight_kg }} kg</dd></div>
           </dl>
 
-          <!-- BMR/TDEE 為估算的提示 -->
-          <p class="estimate-hint">
-            ⓘ BMR / TDEE 為 Mifflin-St Jeor 公式估算（誤差可達 ±10%），實際需求受活動量、睡眠、壓力等影響，建議連續記錄 14～21 天後再依體重趨勢微調。
-          </p>
+          <!-- BMR/TDEE 為估算的提示（縮短文字 + 收進 details，避免擠到下一行） -->
+          <details class="estimate-hint">
+            <summary>ⓘ 為何熱量目標只是「估算」？</summary>
+            <p>
+              BMR / TDEE 用 Mifflin-St Jeor 公式估算（誤差約 ±10%），
+              實際需求受活動量、睡眠、壓力等影響。
+              建議連續記錄 14～21 天後，再依體重趨勢微調目標。
+            </p>
+          </details>
 
           <h4 class="macro-title">今日攝取進度（單日波動屬正常）</h4>
 
@@ -404,7 +417,7 @@ function dietScoreColor(level: string): string {
               :color="progressColor(dashboard.progress_percent.calories, dashboard.is_over.calories)"
               :status="dashboard.is_over.calories ? 'exception' : ''"
               :stroke-width="14"
-              :format="() => dashboard.progress_percent.calories.toFixed(1) + '%'"
+              :format="() => progressLabel(dashboard.progress_percent.calories)"
             />
           </div>
 
@@ -425,7 +438,7 @@ function dietScoreColor(level: string): string {
               :percentage="progressDisplayValue(dashboard.progress_percent.protein_g)"
               :color="progressColor(dashboard.progress_percent.protein_g, dashboard.is_over.protein_g)"
               :stroke-width="14"
-              :format="() => dashboard.progress_percent.protein_g.toFixed(1) + '%'"
+              :format="() => progressLabel(dashboard.progress_percent.protein_g)"
             />
           </div>
 
@@ -447,7 +460,7 @@ function dietScoreColor(level: string): string {
               :color="progressColor(dashboard.progress_percent.fat_g, dashboard.is_over.fat_g)"
               :status="dashboard.is_over.fat_g ? 'exception' : ''"
               :stroke-width="14"
-              :format="() => dashboard.progress_percent.fat_g.toFixed(1) + '%'"
+              :format="() => progressLabel(dashboard.progress_percent.fat_g)"
             />
           </div>
 
@@ -469,7 +482,7 @@ function dietScoreColor(level: string): string {
               :color="progressColor(dashboard.progress_percent.carbs_g, dashboard.is_over.carbs_g)"
               :status="dashboard.is_over.carbs_g ? 'exception' : ''"
               :stroke-width="14"
-              :format="() => dashboard.progress_percent.carbs_g.toFixed(1) + '%'"
+              :format="() => progressLabel(dashboard.progress_percent.carbs_g)"
             />
           </div>
         </section>
@@ -899,6 +912,9 @@ function dietScoreColor(level: string): string {
 .target-mini-grid dd { margin: 0; font-size: 0.9375rem; font-weight: 600; color: #0f172a; }
 @media (max-width: 480px) { .target-mini-grid { grid-template-columns: repeat(2, 1fr); } }
 .estimate-hint { margin: 8px 0 12px; padding: 8px 12px; background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 4px; color: #78350f; font-size: 0.8125rem; line-height: 1.6; }
+.estimate-hint summary { cursor: pointer; font-weight: 500; user-select: none; }
+.estimate-hint summary:hover { color: #92400e; }
+.estimate-hint p { margin: 8px 0 0; padding-left: 4px; }
 
 /* 修正六：7 日趨勢提示 */
 .trend-hint { margin-top: 12px; }

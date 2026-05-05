@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
 import { AxiosError } from 'axios';
 import {
@@ -57,6 +57,32 @@ const goalOptions: Array<{ value: GoalType; label: string }> = [
 ];
 
 const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+// 出生日下限（130 歲），避免使用者輸入不合理的年份
+const minBirthdate = (() => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 130);
+  return d.toISOString().slice(0, 10);
+})();
+
+// 計算的年齡（歲）— 給警告訊息用
+const computedAge = computed<number | null>(() => {
+  if (!form.birthdate) return null;
+  const b = new Date(form.birthdate);
+  const t = new Date();
+  let age = t.getFullYear() - b.getFullYear();
+  const m = t.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && t.getDate() < b.getDate())) age--;
+  return age;
+});
+
+// 不合理年齡的警告
+const ageWarning = computed<string>(() => {
+  const age = computedAge.value;
+  if (age === null) return '';
+  if (age < 10)  return '年齡看起來偏小（< 10 歲），請確認生日';
+  if (age > 120) return '年齡看起來偏大（> 120 歲），請確認生日';
+  return '';
+});
 
 onMounted(async () => {
   try {
@@ -104,7 +130,8 @@ async function onSubmit(): Promise<void> {
       goal_type:      form.goal_type,
     };
     await profileService.updateProfile(payload);
-    router.push({ name: 'dashboard' });
+    // 用 query string 帶時間戳，強制 Dashboard 重新載入（避免顯示舊的 BMR/TDEE/目標）
+    router.push({ name: 'dashboard', query: { _t: Date.now().toString() } });
   } catch (e) {
     if (e instanceof AxiosError && e.response?.status === 422) {
       errors.value = e.response.data?.errors ?? {};
@@ -140,9 +167,12 @@ async function onSubmit(): Promise<void> {
                 v-model="form.birthdate"
                 type="date"
                 :max="today"
-                :class="{ invalid: errors.birthdate }"
+                :min="minBirthdate"
+                :class="{ invalid: errors.birthdate || ageWarning }"
               />
               <small v-if="errors.birthdate" class="error">{{ errors.birthdate[0] }}</small>
+              <small v-else-if="ageWarning" class="warn">⚠️ {{ ageWarning }}</small>
+              <small v-else-if="computedAge !== null" class="hint">目前 {{ computedAge }} 歲</small>
             </div>
 
             <div class="field">
@@ -252,13 +282,13 @@ async function onSubmit(): Promise<void> {
 .back-link { color: #64748b; font-size: 0.875rem; text-decoration: none; }
 .back-link:hover { color: #0ea5e9; }
 .loading { text-align: center; color: #64748b; padding: 24px 0; }
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field { margin-bottom: 16px; }
 label { display: block; font-size: 0.875rem; color: #475569; margin-bottom: 6px; }
 input, select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; box-sizing: border-box; background: white; }
 input:focus, select:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
 input.invalid, select.invalid { border-color: #dc2626; }
 .error { color: #dc2626; font-size: 0.8125rem; display: block; margin-top: 6px; }
+.warn { color: #b45309; font-size: 0.8125rem; display: block; margin-top: 6px; font-weight: 500; }
 .hint { color: #94a3b8; font-size: 0.8125rem; display: block; margin-top: 6px; }
 .alert { background: #fef2f2; color: #b91c1c; padding: 10px 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.875rem; }
 .actions { display: flex; gap: 12px; margin-top: 24px; }
