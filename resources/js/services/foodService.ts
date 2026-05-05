@@ -150,3 +150,4 @@ export const CATEGORY_LABEL: Record<FoodCategory, string> = {
   snack:       '點心',
   other:       '其他',
 };
+
