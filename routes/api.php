@@ -33,6 +33,26 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
+// === TEMP DEBUG: 確認 official 食物匯入狀況（之後可刪） ===
+Route::get('/_debug/tfnd-status', function () {
+    $official = \App\Models\Food::where('source_type', 'official')->count();
+    $total = \App\Models\Food::count();
+    $samples = \App\Models\Food::where('source_type', 'official')
+        ->orderBy('id')
+        ->take(5)
+        ->get(['id', 'name', 'calories'])
+        ->toArray();
+    return response()->json([
+        'official_count' => $official,
+        'total_count'    => $total,
+        'samples'        => $samples,
+        'tfnd_json_exists' => file_exists(database_path('data/tfnd_official.json')),
+        'tfnd_json_size'   => file_exists(database_path('data/tfnd_official.json'))
+            ? filesize(database_path('data/tfnd_official.json'))
+            : 0,
+    ]);
+});
+
 // 需登入
 Route::middleware('auth:sanctum')->group(function () {
     // 會員
