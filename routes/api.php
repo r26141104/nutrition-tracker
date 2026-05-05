@@ -33,24 +33,40 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
-// === TEMP DEBUG: 確認 official 食物匯入狀況（之後可刪） ===
+// === TEMP DEBUG: 一鍵匯入衛福部官方資料（之後可刪） ===
+// 用法：瀏覽器打開 /api/_debug/tfnd-run-import 就會跑匯入
 Route::get('/_debug/tfnd-status', function () {
     $official = \App\Models\Food::where('source_type', 'official')->count();
     $total = \App\Models\Food::count();
-    $samples = \App\Models\Food::where('source_type', 'official')
-        ->orderBy('id')
-        ->take(5)
-        ->get(['id', 'name', 'calories'])
-        ->toArray();
     return response()->json([
-        'official_count' => $official,
-        'total_count'    => $total,
-        'samples'        => $samples,
+        'official_count'   => $official,
+        'total_count'      => $total,
         'tfnd_json_exists' => file_exists(database_path('data/tfnd_official.json')),
         'tfnd_json_size'   => file_exists(database_path('data/tfnd_official.json'))
             ? filesize(database_path('data/tfnd_official.json'))
             : 0,
     ]);
+});
+
+Route::get('/_debug/tfnd-run-import', function () {
+    // 先 truncate 避免 timeout 殘留問題，再重新跑 bulk insert
+    set_time_limit(120);
+    try {
+        \Illuminate\Support\Facades\Artisan::call('import:tfnd', ['--truncate' => true]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        $official = \App\Models\Food::where('source_type', 'official')->count();
+        return response()->json([
+            'status'         => 'success',
+            'official_count' => $official,
+            'output'         => $output,
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => $e->getMessage(),
+            'trace'   => collect($e->getTrace())->take(5)->toArray(),
+        ], 500);
+    }
 });
 
 // 需登入
