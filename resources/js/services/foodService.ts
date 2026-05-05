@@ -45,7 +45,7 @@ export const SOURCE_LABEL: Record<FoodSourceType, string> = {
   user_custom:     '我的',
   imported:        '匯入',
   ai_estimate:     'AI 估算',
-  official:        '官方資料',
+  official:        '✓ 衛福部',
 };
 
 /** 可信度中文標籤 */

@@ -34,8 +34,22 @@ class FoodService
             $query->where('category', $category);
         }
 
-        // 系統食物排前面，再依名稱排序
+        // 排序優先順序：
+        //   1) 衛福部官方資料（official）排最上面 — 誤差最低
+        //   2) 系統內建估算（system_estimate）
+        //   3) 其他（user_custom / ai_estimate / imported）
+        //   4) 同層之內按名稱排序
+        // 用 CASE WHEN 把 source_type 轉成可比較的數字
         return $query
+            ->orderByRaw(
+                "CASE source_type " .
+                "WHEN 'official'        THEN 1 " .
+                "WHEN 'system_estimate' THEN 2 " .
+                "WHEN 'imported'        THEN 3 " .
+                "WHEN 'user_custom'     THEN 4 " .
+                "WHEN 'ai_estimate'     THEN 5 " .
+                "ELSE 9 END"
+            )
             ->orderByDesc('is_system')
             ->orderBy('name')
             ->paginate($perPage)

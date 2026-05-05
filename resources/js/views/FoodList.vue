@@ -293,7 +293,8 @@ async function onDelete(food: Food): Promise<void> {
 .badge-source-custom   { background: #dcfce7; color: #166534; }
 .badge-source-imported { background: #fef3c7; color: #92400e; }
 .badge-source-ai       { background: #ede9fe; color: #6d28d9; }  /* 紫色 = AI */
-.badge-source-official { background: #e0e7ff; color: #4338ca; }
+/* 官方資料 = 綠色更鮮豔，視覺上要明顯比其他來源「正式」 */
+.badge-source-official { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3); }
 /* 可信度 badge 顏色 */
 .badge-conf-high   { background: #dcfce7; color: #166534; }
 .badge-conf-medium { background: #fef3c7; color: #92400e; }
