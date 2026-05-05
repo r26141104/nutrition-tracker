@@ -49,22 +49,78 @@ Route::get('/_debug/tfnd-status', function () {
 });
 
 Route::get('/_debug/tfnd-run-import', function () {
-    // 先 truncate 避免 timeout 殘留問題，再重新跑 bulk insert
-    set_time_limit(120);
+    // 直接 inline 跑 import，繞過 Artisan command 註冊問題
+    set_time_limit(180);
     try {
-        \Illuminate\Support\Facades\Artisan::call('import:tfnd', ['--truncate' => true]);
-        $output = \Illuminate\Support\Facades\Artisan::output();
-        $official = \App\Models\Food::where('source_type', 'official')->count();
+        $jsonPath = database_path('data/tfnd_official.json');
+        if (! file_exists($jsonPath)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'JSON 檔不存在：' . $jsonPath,
+            ], 500);
+        }
+
+        $records = json_decode(file_get_contents($jsonPath), true);
+        if (! is_array($records)) {
+            return response()->json(['status' => 'error', 'message' => 'JSON 格式錯誤'], 500);
+        }
+
+        // 先清掉舊的 official 食物，避免 timeout 殘留
+        $deletedCount = \App\Models\Food::where('source_type', 'official')->delete();
+
+        $catMap = [
+            '穀物類' => 'rice_box', '澱粉類' => 'rice_box',
+            '堅果及種子類' => 'snack', '水果類' => 'snack',
+            '糖類' => 'snack', '糕餅點心類' => 'snack',
+            '乳品類' => 'drink', '飲料類' => 'drink', '嗜好性飲料類' => 'drink',
+            '調理加工食品類' => 'fast_food', '加工調理食品類' => 'fast_food',
+            '加工調理食品及其他類' => 'fast_food',
+        ];
+
+        $now = now();
+        $toInsert = [];
+        foreach ($records as $r) {
+            $name = trim((string) ($r['name'] ?? ''));
+            if ($name === '' || mb_strlen($name) > 100) continue;
+            $cat = (string) ($r['category'] ?? '');
+            $mappedCat = $catMap[$cat] ?? 'other';
+            $toInsert[] = [
+                'name' => $name,
+                'brand' => '衛福部',
+                'category' => $mappedCat,
+                'serving_unit' => 'g',
+                'serving_size' => 100,
+                'calories' => (int) max(0, $r['calories'] ?? 0),
+                'protein_g' => round((float) max(0, $r['protein_g'] ?? 0), 1),
+                'fat_g' => round((float) max(0, $r['fat_g'] ?? 0), 1),
+                'carbs_g' => round((float) max(0, $r['carbs_g'] ?? 0), 1),
+                'is_system' => true,
+                'created_by_user_id' => null,
+                'source_type' => 'official',
+                'confidence_level' => 'high',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        $inserted = 0;
+        foreach (array_chunk($toInsert, 500) as $chunk) {
+            \App\Models\Food::insert($chunk);
+            $inserted += count($chunk);
+        }
+
         return response()->json([
-            'status'         => 'success',
-            'official_count' => $official,
-            'output'         => $output,
+            'status' => 'success',
+            'deleted_old' => $deletedCount,
+            'inserted' => $inserted,
+            'total_official' => \App\Models\Food::where('source_type', 'official')->count(),
+            'message' => '完成！打開食物資料庫應該就能看到「✓ 衛福部」綠色標籤',
         ]);
     } catch (\Throwable $e) {
         return response()->json([
             'status'  => 'error',
             'message' => $e->getMessage(),
-            'trace'   => collect($e->getTrace())->take(5)->toArray(),
+            'file'    => $e->getFile() . ':' . $e->getLine(),
         ], 500);
     }
 });

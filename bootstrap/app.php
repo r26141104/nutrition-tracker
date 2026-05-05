@@ -11,6 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        __DIR__.'/../app/Console/Commands',
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         // 階段 J（Render 部署）：信任 proxy 的 X-Forwarded-* 標頭
         // Render 的 load balancer 終止 HTTPS 後以 HTTP 把請求送給容器，
