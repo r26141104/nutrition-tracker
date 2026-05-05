@@ -84,9 +84,15 @@ Route::get('/_debug/tfnd-run-import', function () {
             if ($name === '' || mb_strlen($name) > 100) continue;
             $cat = (string) ($r['category'] ?? '');
             $mappedCat = $catMap[$cat] ?? 'other';
+            // 把俗名加進 brand 讓搜尋能 match（'aliases' 是 JSON 內的俗名欄位）
+            $aliases = trim((string) ($r['aliases'] ?? ''));
+            $brand = '衛福部';
+            if ($aliases !== '') {
+                $brand = '衛福部 · ' . mb_substr($aliases, 0, 40);
+            }
             $toInsert[] = [
                 'name' => $name,
-                'brand' => '衛福部',
+                'brand' => $brand,
                 'category' => $mappedCat,
                 'serving_unit' => 'g',
                 'serving_size' => 100,
