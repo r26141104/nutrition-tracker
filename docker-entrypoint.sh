@@ -29,6 +29,9 @@ echo "Running seeders (idempotent, safe to re-run)..."
 php artisan db:seed --force --class=FoodSeeder || true
 php artisan db:seed --force --class=ChainStoreSeeder || true
 
+echo "Importing TFND official nutrition data (~2212 foods)..."
+php artisan import:tfnd || true
+
 # === 3. 啟動 Apache（foreground 模式讓 container 不退出） ===
 echo "Starting Apache..."
 exec apache2-foreground
