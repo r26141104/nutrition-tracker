@@ -139,6 +139,13 @@ PROMPT;
             }
         }
 
-        throw new RuntimeException('Gemini Vision 失敗：' . $lastError);
+        // 根據錯誤類型給友善訊息
+        if (str_contains($lastError, '429') || str_contains($lastError, 'RESOURCE_EXHAUSTED') || str_contains($lastError, 'exceeded your current quota')) {
+            throw new RuntimeException('今日 AI 拍照辨識配額已用盡，請明天再試');
+        }
+        if (str_contains($lastError, 'User location is not supported')) {
+            throw new RuntimeException('目前網路位置不支援 Gemini Vision');
+        }
+        throw new RuntimeException('Gemini Vision 暫時不可用：' . $lastError);
     }
 }

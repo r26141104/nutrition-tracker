@@ -164,7 +164,14 @@ class NutritionEstimateService
             // 其他（429, 500, 503...）→ 進下一輪重試
         }
 
-        throw new RuntimeException("模型 {$model} 重試 " . self::MAX_RETRIES_PER_MODEL . " 次仍失敗（status={$lastStatus}）");
+        // 根據錯誤類型給友善訊息
+        if (str_contains((string) $lastBody, 'RESOURCE_EXHAUSTED') || str_contains((string) $lastBody, 'exceeded your current quota') || $lastStatus === 429) {
+            throw new RuntimeException('今日 AI 估算配額已用盡，請明天再試（每日免費額度有限）');
+        }
+        if (str_contains((string) $lastBody, 'User location is not supported')) {
+            throw new RuntimeException('目前網路位置不支援 Gemini AI');
+        }
+        throw new RuntimeException('AI 估算服務暫時忙碌，請稍後再試');
     }
 
     // ========================================================================

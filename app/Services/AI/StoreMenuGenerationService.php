@@ -299,7 +299,17 @@ PROMPT;
             }
         }
 
-        throw new RuntimeException('AI 服務目前忙碌中，請稍後再試（' . $lastError . '）');
+        // 根據錯誤類型給友善訊息
+        if (str_contains($lastError, '429') || str_contains($lastError, 'RESOURCE_EXHAUSTED') || str_contains($lastError, 'exceeded your current quota')) {
+            throw new RuntimeException('今日 AI 推測配額已用盡，請明天再試（每日免費額度有限）');
+        }
+        if (str_contains($lastError, 'User location is not supported')) {
+            throw new RuntimeException('目前網路位置不支援 Gemini AI（伺服器需在支援的地區）');
+        }
+        if (str_contains($lastError, '503') || str_contains($lastError, 'UNAVAILABLE')) {
+            throw new RuntimeException('Gemini 服務暫時不可用，請稍後再試');
+        }
+        throw new RuntimeException('AI 服務目前忙碌中，請稍後再試');
     }
 
     /**
