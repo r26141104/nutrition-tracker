@@ -87,10 +87,17 @@ PROMPT;
                     ->post($endpoint, $payload);
 
                 if (! $response->successful()) {
-                    $lastError = "model {$model} status {$response->status()}";
-                    if (in_array($response->status(), [400, 401, 403], true)) {
-                        throw new RuntimeException($lastError . ' ' . substr($response->body(), 0, 200));
+                    $status = $response->status();
+                    $body = substr($response->body(), 0, 300);
+                    $lastError = "model {$model} status {$status} {$body}";
+
+                    // 401/403：key 錯 → 直接拋
+                    if (in_array($status, [401, 403], true)) {
+                        throw new RuntimeException($lastError);
                     }
+
+                    // 400 FAILED_PRECONDITION / User location not supported / 429 / 503
+                    // → fallback 到下一個 model
                     continue;
                 }
 

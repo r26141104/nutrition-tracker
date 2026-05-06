@@ -267,12 +267,19 @@ PROMPT;
                     ->post($endpoint, $payload);
 
                 if (! $response->successful()) {
-                    $lastError = "model {$model} status {$response->status()}";
-                    if (in_array($response->status(), [400, 401, 403], true)) {
-                        // 永久錯誤直接拋
-                        throw new RuntimeException($lastError . ' ' . substr($response->body(), 0, 200));
+                    $status = $response->status();
+                    $body = substr($response->body(), 0, 300);
+                    $lastError = "model {$model} status {$status} {$body}";
+
+                    // 401/403：API key 錯誤 → 直接拋（fallback 也救不了）
+                    if (in_array($status, [401, 403], true)) {
+                        throw new RuntimeException($lastError);
                     }
-                    continue; // 503/429 等暫時錯 → 試下一個 model
+
+                    // 其他錯誤（含 400 FAILED_PRECONDITION / User location not supported / 429 / 503）
+                    // → fallback 到下一個 model 試試看
+                    Log::warning('Gemini status error, trying next model', ['model' => $model, 'status' => $status]);
+                    continue;
                 }
 
                 $body = $response->json();

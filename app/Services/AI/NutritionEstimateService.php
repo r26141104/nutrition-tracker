@@ -150,9 +150,15 @@ class NutritionEstimateService
                 return $rawText;
             }
 
-            // 永久性錯誤（API key 錯、prompt 違規）→ 不重試、直接拋
-            if (in_array($status, [400, 401, 403, 404], true)) {
+            // API key 錯 / 權限問題 → 真的拋（fallback 救不了）
+            if (in_array($status, [401, 403], true)) {
                 throw new RuntimeException("模型 {$model} 回 {$status}：" . $lastBody);
+            }
+
+            // 400（含 FAILED_PRECONDITION / User location not supported）/ 404 / 429 / 500 / 503
+            // → break 出本 model 的重試迴圈，讓外層 fallback 到下一個 model
+            if (in_array($status, [400, 404], true)) {
+                break;
             }
 
             // 其他（429, 500, 503...）→ 進下一輪重試
