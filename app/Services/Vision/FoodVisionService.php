@@ -100,12 +100,88 @@ class FoodVisionService
         'snack'          => [],
         'candy'          => ['糖果'],
 
-        // 中華料理
+        // 中華料理 + 台式餅類
         'dumpling'       => ['餃', '水餃', '煎餃'],
         'soup'           => ['湯'],
         'congee'         => ['粥'],
         'bun'            => ['包', '饅頭'],
-        'pancake'        => ['鬆餅', '蛋餅'],
+        'pancake'        => ['蛋餅', '蔥抓餅', '鬆餅'],
+        'flatbread'      => ['蔥抓餅', '蛋餅', '餅'],
+        'roti'           => ['蔥抓餅', '抓餅'],
+        'roti canai'     => ['蔥抓餅', '抓餅'],
+        'roti prata'     => ['蔥抓餅', '抓餅'],
+        'paratha'        => ['蔥抓餅', '抓餅'],
+        'tortilla'       => ['蔥抓餅', '蛋餅'],
+        'parotta'        => ['蔥抓餅'],
+        'kulcha'         => ['蔥抓餅', '燒餅'],
+        'crepe'          => ['蛋餅', '可麗餅'],
+        'spring pancake' => ['蔥抓餅', '蛋餅'],
+        'scallion pancake' => ['蔥抓餅'],
+        'sausage'        => ['香腸', '熱狗'],
+        'meatball'       => ['貢丸', '肉丸'],
+        'ham'            => ['火腿'],
+        'bacon'          => ['培根'],
+        'cheese'         => ['起司'],
+        'butter'         => ['奶油'],
+        'milk'           => ['牛奶', '鮮奶'],
+        'yogurt'         => ['優格', '優酪乳'],
+        'ice cream'      => ['冰淇淋'],
+        'donut'          => ['甜甜圈'],
+        'doughnut'       => ['甜甜圈'],
+        'pudding'        => ['布丁'],
+        'cabbage'        => ['高麗菜'],
+        'lettuce'        => ['萵苣'],
+        'tomato'         => ['番茄'],
+        'cucumber'       => ['黃瓜'],
+        'carrot'         => ['紅蘿蔔'],
+        'potato'         => ['馬鈴薯'],
+        'sweet potato'   => ['地瓜'],
+        'corn'           => ['玉米'],
+        'mushroom'       => ['菇'],
+        'onion'          => ['洋蔥'],
+        'spinach'        => ['菠菜'],
+        'broccoli'       => ['花椰菜'],
+        'orange'         => ['橘子', '柳橙'],
+        'grape'          => ['葡萄'],
+        'pineapple'      => ['鳳梨'],
+        'mango'          => ['芒果'],
+        'watermelon'     => ['西瓜'],
+        'strawberry'     => ['草莓'],
+        'kiwi'           => ['奇異果'],
+        'pear'           => ['水梨'],
+        'peanut'         => ['花生'],
+        'almond'         => ['杏仁'],
+        'cashew'         => ['腰果'],
+        'walnut'         => ['核桃'],
+
+        // 菜系/通用詞 → 跳過（不查食物，會誤命中）
+        'punjabi cuisine'         => [],
+        'indian cuisine'          => [],
+        'chinese cuisine'         => [],
+        'taiwanese cuisine'       => [],
+        'american chinese cuisine' => [],
+        'sindhi cuisine'          => [],
+        'mediterranean cuisine'   => [],
+        'asian food'              => [],
+        'finger food'             => [],
+        'comfort food'            => [],
+        'street food'             => [],
+        'home cooking'            => [],
+        'cooking'                 => [],
+        'culinary art'            => [],
+        'flavor'                  => [],
+        'side dish'               => [],
+        'main course'             => [],
+        'fried food'              => [],
+        'baked food'              => [],
+        'leaf vegetable'          => [],
+        'whole food'              => [],
+        'plate'                   => [],
+        'bowl'                    => [],
+        'tableware'               => [],
+        'kitchen utensil'         => [],
+        'kati roll'               => [],
+        'bhakri'                  => [],
 
         // 通用詞 → 跳過（太通用搜不到結果）
         'food'           => [],
@@ -459,20 +535,21 @@ class FoodVisionService
             }
         }
 
-        // category fallback：如果關鍵字命中不多，再用 category 補
-        if (count($matchedFoodIds) < 5 && ! empty($categories)) {
-            $catFoods = Food::query()
-                ->visibleTo($user->id)
-                ->whereIn('category', array_keys($categories))
-                ->limit(20)
-                ->get();
-
-            foreach ($catFoods as $food) {
-                if (! isset($matchedFoodIds[$food->id])) {
-                    $catScore = $categories[$food->category] ?? 0.5;
+        // category fallback：只有「完全沒有 keyword 命中」+「category 信心 > 0.75」才用
+        // 避免「fast food 69%」這種弱信心 label 把整個麥當勞菜單拉出來
+        if (count($matchedFoodIds) === 0 && ! empty($categories)) {
+            $strongCats = array_filter($categories, fn ($s) => $s >= 0.75);
+            if (! empty($strongCats)) {
+                $catFoods = Food::query()
+                    ->visibleTo($user->id)
+                    ->whereIn('category', array_keys($strongCats))
+                    ->limit(8)
+                    ->get();
+                foreach ($catFoods as $food) {
+                    $catScore = $strongCats[$food->category] ?? 0.5;
                     $matchedFoodIds[$food->id] = [
                         'food'  => $food,
-                        'score' => $catScore * 0.7, // category fallback 降權重
+                        'score' => $catScore * 0.4, // 大幅降權重，明確標示是 fallback
                     ];
                 }
             }
