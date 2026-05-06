@@ -397,6 +397,23 @@ function dietScoreColor(level: string): string {
             </p>
           </details>
 
+          <!-- 攝取 - 運動消耗 = 淨熱量 -->
+          <div class="net-calories-box">
+            <div class="net-row">
+              <span class="net-label">🍽 今日攝取</span>
+              <span class="net-value">{{ dashboard.consumed.calories }} kcal</span>
+            </div>
+            <div class="net-row minus">
+              <span class="net-label">🔥 運動消耗</span>
+              <span class="net-value">− {{ dashboard.exercise_burned }} kcal</span>
+            </div>
+            <div class="net-row total">
+              <span class="net-label">＝ 淨熱量</span>
+              <span class="net-value">{{ dashboard.net_calories }} kcal</span>
+            </div>
+            <RouterLink to="/exercise-burn" class="net-link">前往記錄運動 →</RouterLink>
+          </div>
+
           <h4 class="macro-title">今日攝取進度（單日波動屬正常）</h4>
 
           <!-- 熱量 -->
@@ -915,6 +932,16 @@ function dietScoreColor(level: string): string {
 .estimate-hint summary { cursor: pointer; font-weight: 500; user-select: none; }
 .estimate-hint summary:hover { color: #92400e; }
 .estimate-hint p { margin: 8px 0 0; padding-left: 4px; }
+
+/* 淨熱量小卡：攝取 - 運動消耗 = 淨熱量 */
+.net-calories-box { margin: 12px 0 16px; padding: 12px 14px; background: linear-gradient(135deg, #f0fdf4, #ecfeff); border: 1px solid #a7f3d0; border-radius: 8px; }
+.net-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; font-size: 0.875rem; color: #475569; font-variant-numeric: tabular-nums; }
+.net-row.minus { color: #ea580c; }
+.net-row.total { padding-top: 8px; margin-top: 4px; border-top: 1px dashed #86efac; font-size: 1rem; font-weight: 700; color: #047857; }
+.net-row .net-value { font-weight: 600; }
+.net-row.total .net-value { font-size: 1.125rem; }
+.net-link { display: inline-block; margin-top: 8px; font-size: 0.8125rem; color: #0ea5e9; text-decoration: none; }
+.net-link:hover { text-decoration: underline; }
 
 /* 修正六：7 日趨勢提示 */
 .trend-hint { margin-top: 12px; }

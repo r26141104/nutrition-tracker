@@ -15,6 +15,7 @@ use App\Http\Controllers\MealController;
 use App\Http\Controllers\NearbyStoreController;
 use App\Http\Controllers\NutritionEstimateController;
 use App\Http\Controllers\NutritionTargetController;
+use App\Http\Controllers\ExerciseLogController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\StreakController;
 use App\Http\Controllers\UserProfileController;
@@ -161,6 +162,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // 注意：trend 必須在 apiResource 之前，否則會被當成 /{bodyRecord} 處理
     Route::get('body-records/trend', [BodyRecordController::class, 'trend']);
     Route::apiResource('body-records', BodyRecordController::class)->whereNumber('body_record');
+
+    // 運動消耗紀錄
+    Route::get('exercise-logs',           [ExerciseLogController::class, 'index']);
+    Route::post('exercise-logs',          [ExerciseLogController::class, 'store']);
+    Route::delete('exercise-logs/{id}',   [ExerciseLogController::class, 'destroy'])->whereNumber('id');
 
     // 目標進度與達標時間估算
     Route::get('goal-progress', [GoalProgressController::class, 'show']);

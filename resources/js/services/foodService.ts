@@ -18,6 +18,11 @@ export type FoodSourceType =
 
 export type FoodConfidenceLevel = 'high' | 'medium' | 'low';
 
+export interface ServingPreset {
+  label: string;  // 例：「1 張」「1 碗」「100g」
+  grams: number;  // 對應的克數
+}
+
 export interface Food {
   id: number;
   name: string;
@@ -35,6 +40,8 @@ export interface Food {
   source_type: FoodSourceType;
   confidence_level: FoodConfidenceLevel;
   is_owned: boolean;
+  // 常見份量按鈕（從食物名稱猜，例如蔥抓餅 → [{label: "1 張", grams: 90}]）
+  serving_presets?: ServingPreset[];
   created_at: string | null;
   updated_at: string | null;
 }

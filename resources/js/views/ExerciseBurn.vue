@@ -2,6 +2,30 @@
 import { ref, computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import { profileService } from '@/services/profileService';
+import http from '@/services/http';
+import { ElMessage } from 'element-plus';
+
+const loggingId = ref<string | null>(null);
+
+async function logExercise(ex: { name: string; calories: number }): Promise<void> {
+  loggingId.value = ex.name;
+  try {
+    await http.post('/exercise-logs', {
+      exercise_name:   ex.name,
+      duration_min:    duration.value,
+      calories_burned: ex.calories,
+    });
+    ElMessage.success(`已記錄：${ex.name} ${duration.value} 分鐘 / ${ex.calories} kcal`);
+  } catch (e) {
+    const msg = e && typeof e === 'object' && 'response' in e
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? ((e as any).response?.data?.message ?? '儲存失敗')
+      : '儲存失敗';
+    ElMessage.error(msg);
+  } finally {
+    loggingId.value = null;
+  }
+}
 
 interface Exercise {
   name: string;
@@ -194,6 +218,14 @@ function bowlsOfRice(cal: number): string {
             <span class="met-tag">MET {{ ex.met }}</span>
             <span class="rice-tag">≈ {{ bowlsOfRice(ex.calories) }}</span>
           </div>
+          <button
+            type="button"
+            class="btn-log"
+            :disabled="loggingId === ex.name"
+            @click="logExercise(ex)"
+          >
+            {{ loggingId === ex.name ? '儲存中…' : '＋ 記錄到今日' }}
+          </button>
         </div>
       </div>
     </div>
@@ -356,6 +388,24 @@ function bowlsOfRice(cal: number): string {
   color: #64748b;
 }
 .met-tag { background: #ede9fe; color: #6d28d9; font-weight: 500; }
+.btn-log {
+  width: 100%;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: 0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.btn-log:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.25);
+}
+.btn-log:disabled { opacity: 0.6; cursor: not-allowed; }
+
 
 /* 免責聲明 */
 .disclaimer { background: #fffbeb; border-color: #fef3c7; }

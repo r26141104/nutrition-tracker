@@ -84,6 +84,8 @@ export interface DashboardData {
   is_over: IsOver;
   warnings: WarningItem[];
   today_meals: DashboardMeal[];
+  exercise_burned: number;       // 今日運動消耗 kcal
+  net_calories: number;          // 淨熱量 = consumed - exercise_burned
 }
 
 interface DashboardResponse {

@@ -225,20 +225,52 @@ class FoodVisionService
     ];
 
     /**
-     * 主入口：把照片送去 Google Vision，回傳辨識結果 + 候選食物。
+     * 主入口：把照片送去 AI 視覺辨識，回傳辨識結果 + 候選食物。
+     *
+     * 兩段式流程：
+     *   1. 先用 Gemini 多模態（直接給中文台灣食物名）
+     *   2. Gemini 失敗就 fallback 到 Cloud Vision
      *
      * @param  string  $imageContent  二進位圖片資料
      * @return array<string, mixed>
      */
     public function analyze(User $user, string $imageContent): array
     {
+        // === 嘗試 1：Gemini 多模態（首選，台灣食物辨識更準）===
+        try {
+            $gemini = app(GeminiVisionService::class);
+            $geminiResult = $gemini->recognize($imageContent);
+            $names = $geminiResult['names'] ?? [];
+
+            if (! empty($names)) {
+                $candidates = $this->matchByGeminiNames($user, $names);
+                $entities = array_map(
+                    fn ($n) => ['name' => (string) ($n['name'] ?? ''), 'score' => (float) ($n['score'] ?? 0.8)],
+                    $names,
+                );
+
+                return [
+                    'labels'     => [],
+                    'entities'   => $entities,
+                    'candidates' => $candidates,
+                    'notes'      => [
+                        'AI 辨識結果僅供參考，實際食物與份量請自行確認。',
+                        '本次使用 Gemini 多模態辨識（針對台灣食物優化）。',
+                        '若沒有合適候選，請手動到「食物資料庫」搜尋或新增。',
+                    ],
+                    'engine' => 'gemini',
+                ];
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Gemini Vision 辨識失敗，改用 Cloud Vision', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // === 嘗試 2：Cloud Vision fallback ===
         $rawLabels = $this->callVisionApi($imageContent);
-
-        // 整理出所有候選關鍵字
-        $allLabels = $rawLabels['labels'];     // [['name' => 'fried chicken', 'score' => 0.92], ...]
-        $allEntities = $rawLabels['entities']; // [['name' => '雞排', 'score' => 0.85], ...]
-
-        // 對映到 foods 候選清單
+        $allLabels = $rawLabels['labels'];
+        $allEntities = $rawLabels['entities'];
         $candidates = $this->matchToFoods($user, $allLabels, $allEntities);
 
         return [
@@ -250,7 +282,67 @@ class FoodVisionService
                 'Google Cloud Vision 給的標籤是英文，系統已嘗試對應到食物資料庫。',
                 '若沒有合適候選，請手動到「食物資料庫」搜尋或新增。',
             ],
+            'engine' => 'cloud_vision',
         ];
+    }
+
+    /**
+     * 用 Gemini 給的中文食物名直接對 foods.name 做 LIKE 比對。
+     *
+     * @param  array<int, array{name: string, score: float}>  $names
+     * @return array<int, array<string, mixed>>
+     */
+    private function matchByGeminiNames(User $user, array $names): array
+    {
+        if (empty($names)) {
+            return [];
+        }
+
+        $query = Food::query()->visibleTo($user->id);
+        $query->where(function ($q) use ($names) {
+            foreach ($names as $row) {
+                $name = trim((string) ($row['name'] ?? ''));
+                if ($name === '') continue;
+                $q->orWhere('name', 'like', "%{$name}%");
+            }
+        });
+
+        $matched = [];
+        foreach ($query->limit(50)->get() as $food) {
+            $best = 0.0;
+            foreach ($names as $row) {
+                $kw = trim((string) ($row['name'] ?? ''));
+                if ($kw === '') continue;
+                if (mb_stripos($food->name, $kw) !== false) {
+                    $best = max($best, (float) ($row['score'] ?? 0.8));
+                }
+            }
+            $matched[$food->id] = ['food' => $food, 'score' => $best];
+        }
+
+        usort($matched, fn ($a, $b) => $b['score'] <=> $a['score']);
+
+        $candidates = [];
+        foreach (array_slice($matched, 0, self::MAX_CANDIDATES) as $row) {
+            $f = $row['food'];
+            $candidates[] = [
+                'id'               => $f->id,
+                'name'             => $f->name,
+                'brand'            => $f->brand,
+                'category'         => $f->category,
+                'serving_unit'     => $f->serving_unit,
+                'serving_size'     => (float) $f->serving_size,
+                'calories'         => (int) $f->calories,
+                'protein_g'        => (float) $f->protein_g,
+                'fat_g'            => (float) $f->fat_g,
+                'carbs_g'          => (float) $f->carbs_g,
+                'source_type'      => $f->source_type,
+                'confidence_level' => $f->confidence_level,
+                'match_score'      => round($row['score'], 3),
+            ];
+        }
+
+        return $candidates;
     }
 
     // ========================================================================

@@ -170,6 +170,20 @@ function cancelPick(): void {
   pickedQty.value = 1;
 }
 
+/**
+ * 套用「常見份量」預設按鈕：把 grams 換算成 quantity。
+ * 假設食物的 serving_size 是以 g 為單位（FoodResource 預設行為）。
+ */
+function applyPreset(grams: number): void {
+  if (!pickedFood.value) return;
+  const food = pickedFood.value;
+  if (food.serving_size && food.serving_size > 0) {
+    pickedQty.value = Math.round((grams / food.serving_size) * 100) / 100;
+  } else {
+    pickedQty.value = 1;
+  }
+}
+
 function addPickedItem(): void {
   if (!pickedFood.value) return;
   if (!pickedQty.value || pickedQty.value <= 0) {
@@ -546,6 +560,23 @@ function localInputToBackend(local: string): string | null {
               <button type="button" class="btn-add" @click="addPickedItem">加入</button>
               <button type="button" class="btn-cancel" @click="cancelPick">×</button>
             </div>
+
+            <!-- 常見份量快速按鈕（後端 CommonServingService 提供） -->
+            <div
+              v-if="pickedFood && pickedFood.serving_presets && pickedFood.serving_presets.length > 0"
+              class="serving-presets"
+            >
+              <span class="preset-label">常見份量：</span>
+              <button
+                v-for="(preset, idx) in pickedFood.serving_presets"
+                :key="idx"
+                type="button"
+                class="preset-btn"
+                @click="applyPreset(preset.grams)"
+              >
+                {{ preset.label }}
+              </button>
+            </div>
           </div>
 
           <!-- 即時 totals -->
@@ -637,6 +668,12 @@ textarea { resize: vertical; }
 .btn-add:hover { background: #0284c7; }
 .btn-cancel { background: white; color: #64748b; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
 .btn-cancel:hover { background: #f1f5f9; }
+
+/* 常見份量快速按鈕 */
+.serving-presets { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; padding: 8px 10px; background: #fffbeb; border: 1px dashed #fcd34d; border-radius: 8px; }
+.preset-label { font-size: 0.8125rem; color: #92400e; font-weight: 500; }
+.preset-btn { background: white; color: #92400e; border: 1px solid #fcd34d; padding: 4px 10px; border-radius: 999px; font-size: 0.8125rem; cursor: pointer; transition: all 0.15s; }
+.preset-btn:hover { background: #fef3c7; border-color: #f59e0b; }
 
 .live-totals { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 16px; background: #f0f9ff; border-radius: 8px; margin: 16px 0 20px; }
 .live-cal { font-size: 1.5rem; font-weight: 700; color: #0ea5e9; }

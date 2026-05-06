@@ -60,6 +60,8 @@ class DashboardService
                 'is_over'           => $this->allFalse(),
                 'warnings'          => [],
                 'today_meals'       => [],
+                'exercise_burned'   => 0,
+                'net_calories'      => 0,
             ];
         }
 
@@ -80,6 +82,15 @@ class DashboardService
         // 2) 今日 meals + 攝取量
         $meals = $this->mealService->listOfDate($user->id, $date);
         $consumed = $this->sumConsumed($meals);
+
+        // 2.5) 今日運動消耗（直接用 ExerciseLog 模型查當天）
+        $exerciseBurned = (int) \App\Models\ExerciseLog::query()
+            ->where('user_id', $user->id)
+            ->where('logged_at', $date)
+            ->sum('calories_burned');
+
+        // 淨熱量 = 攝取 - 運動消耗
+        $netCalories = $consumed['calories'] - $exerciseBurned;
 
         // 3) remaining（允許負數，表示已超過）
         $remaining = [
@@ -131,6 +142,8 @@ class DashboardService
             'is_over'           => $isOver,
             'warnings'          => $warnings,
             'today_meals'       => $todayMeals,
+            'exercise_burned'   => $exerciseBurned,
+            'net_calories'      => $netCalories,
         ];
     }
 
